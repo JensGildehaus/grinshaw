@@ -8,6 +8,7 @@ create table if not exists tasks (
   source      text default 'manual' check (source in ('manual', 'github', 'calendar')),
   grinshaw_note text,
   created_at  timestamptz not null default now(),
+  due_date    timestamptz,
   updated_at  timestamptz not null default now()
 );
 
