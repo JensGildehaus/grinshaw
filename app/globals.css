@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --g-bg: #2d4a35;
+  --g-bg: #1a2e20;
   --g-gold: #d4b483;
   --g-text: #f0e8d8;
   --g-border: rgba(212, 180, 131, 0.2);

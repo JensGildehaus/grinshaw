@@ -69,20 +69,19 @@ export default function LoginPage() {
             lineHeight: "1.6",
           }}
         >
-          „Ich war nicht sicher, ob Sie zurückkehren würden. Wie erfreulich
-          unerwartet."
+          „Ich war nicht sicher, ob Sie zurückkehren würden. Wie&nbsp;erfreulich unerwartet."
         </p>
 
-        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <div>
             <label
               style={{
                 display: "block",
-                fontSize: "0.7rem",
+                fontSize: "0.65rem",
                 color: "var(--g-gold)",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                marginBottom: "0.4rem",
+                marginBottom: "0.25rem",
                 fontFamily: "var(--font-playfair), Georgia, serif",
               }}
             >
@@ -100,7 +99,7 @@ export default function LoginPage() {
                 borderBottom: "1px solid var(--g-border)",
                 color: "var(--g-text)",
                 fontSize: "0.9rem",
-                padding: "0.4rem 0",
+                padding: "0.25rem 0",
                 outline: "none",
                 fontFamily: "inherit",
                 boxSizing: "border-box",
@@ -112,11 +111,11 @@ export default function LoginPage() {
             <label
               style={{
                 display: "block",
-                fontSize: "0.7rem",
+                fontSize: "0.65rem",
                 color: "var(--g-gold)",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                marginBottom: "0.4rem",
+                marginBottom: "0.25rem",
                 fontFamily: "var(--font-playfair), Georgia, serif",
               }}
             >
@@ -134,7 +133,7 @@ export default function LoginPage() {
                 borderBottom: "1px solid var(--g-border)",
                 color: "var(--g-text)",
                 fontSize: "0.9rem",
-                padding: "0.4rem 0",
+                padding: "0.25rem 0",
                 outline: "none",
                 fontFamily: "inherit",
                 boxSizing: "border-box",
@@ -155,27 +154,27 @@ export default function LoginPage() {
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: "0.5rem",
-              background: "transparent",
-              border: "1px solid var(--g-border)",
-              color: "var(--g-gold)",
-              fontSize: "0.75rem",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              padding: "0.7rem 1rem",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.4 : 1,
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              transition: "opacity 0.2s",
-              width: "100%",
-            }}
-          >
-            {loading ? "Einen Moment bitte…" : "Eintreten"}
-          </button>
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "0.5rem" }}>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--g-border)",
+                color: "var(--g-gold)",
+                fontSize: "0.72rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                padding: "0.6rem 2.5rem",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.4 : 1,
+                fontFamily: "var(--font-playfair), Georgia, serif",
+                transition: "opacity 0.2s",
+              }}
+            >
+              {loading ? "Einen Moment bitte…" : "Eintreten"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
