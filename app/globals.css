@@ -53,7 +53,7 @@ body {
 }
 
 .butler-img {
-  height: 180px;
+  height: 270px;
 }
 
 @media (min-width: 640px) {
@@ -67,6 +67,6 @@ body {
   }
 
   .butler-img {
-    height: 260px;
+    height: 390px;
   }
 }
