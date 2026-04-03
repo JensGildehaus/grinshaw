@@ -33,16 +33,16 @@ function groupByTopic(tasks: Task[]): Record<string, Task[]> {
   }, {});
 }
 
-function formatDate(iso: string | null): string | null {
+function formatDate(iso: string | null): { text: string; tone: "urgent" | "today" | "soon" | "normal" } | null {
   if (!iso) return null;
   const d = new Date(iso);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diff = Math.floor((d.getTime() - today.getTime()) / 86400000);
-  if (diff < 0) return `überfällig seit ${Math.abs(diff)} Tag${Math.abs(diff) !== 1 ? "en" : ""}`;
-  if (diff === 0) return "heute";
-  if (diff === 1) return "morgen";
-  return d.toLocaleDateString("de-DE", { day: "numeric", month: "long" });
+  if (diff < 0) return { text: `Überfällig seit ${Math.abs(diff)} Tag${Math.abs(diff) !== 1 ? "en" : ""}. Man schweigt dazu.`, tone: "urgent" };
+  if (diff === 0) return { text: "Heute. Man hat es zur Kenntnis genommen.", tone: "today" };
+  if (diff === 1) return { text: "Morgen. Noch ist Zeit.", tone: "soon" };
+  return { text: d.toLocaleDateString("de-DE", { day: "numeric", month: "long" }), tone: "normal" };
 }
 
 export default function Angelegenheiten() {
@@ -243,105 +243,72 @@ export default function Angelegenheiten() {
               </div>
               {!isCollapsed && <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {grouped[topic].map((task) => {
-                  const dateStr = formatDate(task.due_date);
-                  const isOverdue = dateStr?.startsWith("überfällig");
+                  const date = formatDate(task.due_date);
                   return (
                     <div
                       key={task.id}
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
-                        gap: "0.75rem",
-                        padding: "0.65rem 0.75rem",
-                        background: task.status === "done" ? "transparent" : "rgba(0,0,0,0.15)",
-                        border: "1px solid var(--g-border)",
-                        borderRadius: "2px",
-                        opacity: task.status === "done" ? 0.5 : 1,
+                        gap: "0.85rem",
+                        padding: "0.7rem 0.6rem 0.7rem 0.9rem",
+                        borderLeft: `2px solid ${task.status === "done" ? "rgba(212,180,131,0.2)" : PRIORITY_COLOR[task.priority] ?? "var(--g-muted)"}`,
+                        borderBottom: "1px solid var(--g-border)",
+                        opacity: task.status === "done" ? 0.45 : 1,
                         transition: "opacity 0.2s",
                       }}
                     >
-                      {/* Priority dot */}
-                      <div
-                        style={{
-                          width: "6px",
-                          height: "6px",
-                          borderRadius: "50%",
-                          background: PRIORITY_COLOR[task.priority] ?? "var(--g-muted)",
-                          flexShrink: 0,
-                          marginTop: "5px",
-                        }}
-                        title={PRIORITY_LABEL[task.priority]}
-                      />
-
                       {/* Content */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p
-                          style={{
-                            fontSize: "0.875rem",
-                            lineHeight: "1.5",
-                            color: "var(--g-text)",
-                            textDecoration: task.status === "done" ? "line-through" : "none",
-                            margin: 0,
-                          }}
-                        >
+                        <p style={{
+                          fontSize: "0.875rem",
+                          lineHeight: "1.55",
+                          color: "var(--g-text)",
+                          textDecoration: task.status === "done" ? "line-through" : "none",
+                          margin: 0,
+                        }}>
                           {task.title}
                         </p>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "0.75rem",
-                            marginTop: "0.3rem",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          {dateStr && (
-                            <span
-                              style={{
-                                fontSize: "0.68rem",
-                                color: isOverdue ? "#c0392b" : "var(--g-muted)",
-                                letterSpacing: "0.04em",
-                              }}
-                            >
-                              {dateStr}
-                            </span>
-                          )}
-                          {task.status === "snoozed" && (
-                            <span
-                              style={{
-                                fontSize: "0.68rem",
-                                color: "var(--g-muted)",
-                                letterSpacing: "0.04em",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              zurückgestellt
-                            </span>
-                          )}
-                        </div>
+                        {date && (
+                          <p style={{
+                            fontSize: "0.7rem",
+                            color: date.tone === "urgent" ? "#c0392b" : date.tone === "today" ? "var(--g-gold)" : "var(--g-muted)",
+                            fontStyle: "italic",
+                            marginTop: "0.25rem",
+                            lineHeight: 1.4,
+                          }}>
+                            {date.text}
+                          </p>
+                        )}
+                        {task.status === "snoozed" && (
+                          <p style={{ fontSize: "0.7rem", color: "var(--g-muted)", fontStyle: "italic", marginTop: "0.2rem" }}>
+                            Zurückgestellt. Man wartet ab.
+                          </p>
+                        )}
                       </div>
 
-                      {/* Toggle */}
+                      {/* Toggle — Siegel statt Checkbox */}
                       <button
                         onClick={() => toggleStatus(task)}
                         title={task.status === "done" ? "Als offen markieren" : "Als erledigt markieren"}
                         style={{
-                          background: "transparent",
-                          border: `1px solid ${task.status === "done" ? "var(--g-gold)" : "var(--g-border)"}`,
-                          width: "18px",
-                          height: "18px",
-                          borderRadius: "2px",
+                          background: task.status === "done" ? "rgba(212,180,131,0.15)" : "transparent",
+                          border: `1px solid ${task.status === "done" ? "rgba(212,180,131,0.6)" : "rgba(212,180,131,0.25)"}`,
+                          width: "22px",
+                          height: "22px",
+                          borderRadius: "50%",
                           flexShrink: 0,
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           marginTop: "1px",
-                          transition: "border-color 0.2s",
+                          transition: "all 0.2s",
                         }}
                       >
                         {task.status === "done" && (
                           <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                            <path d="M1.5 5L4 7.5L8.5 2.5" stroke="var(--g-gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M1.5 5L4 7.5L8.5 2.5" stroke="var(--g-gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         )}
                       </button>
@@ -370,12 +337,13 @@ export default function Angelegenheiten() {
           letterSpacing: "0.1em",
           textTransform: "uppercase",
           textDecoration: "none",
-          padding: "0.75rem 1.25rem",
-          fontWeight: 700,
+          padding: "0.7rem 1.4rem",
+          fontWeight: 400,
           zIndex: 50,
+          fontStyle: "italic",
         }}
       >
-        Chat
+        Zum Butler
       </Link>
     </div>
   );
