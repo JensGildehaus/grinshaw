@@ -351,6 +351,23 @@ export default function Home() {
           boxSizing: "border-box",
         }}
       >
+        <a
+          href="/angelegenheiten"
+          style={{
+            display: "block",
+            textAlign: "center",
+            fontSize: "0.65rem",
+            color: "var(--g-gold)",
+            letterSpacing: "0.1em",
+            textDecoration: "none",
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            textTransform: "uppercase",
+            paddingBottom: "0.75rem",
+            opacity: 0.7,
+          }}
+        >
+          Angelegenheiten
+        </a>
         <div
           style={{
             display: "flex",
@@ -397,8 +414,7 @@ export default function Home() {
             style={{
               background: "transparent",
               border: "none",
-              color: "var(--g-gold)",
-              opacity: listening ? 1 : 0.7,
+              opacity: listening ? 1 : 0.6,
               cursor: "pointer",
               padding: "0.35rem 0.25rem",
               fontSize: "1rem",
@@ -407,7 +423,17 @@ export default function Home() {
               flexShrink: 0,
             }}
           >
-            {listening ? "⏹" : "🎙"}
+            {listening ? (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="4" y="4" width="8" height="8" rx="1" fill="#d4b483"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="6" y="1" width="4" height="7" rx="2" fill="#d4b483"/>
+                <path d="M3 7a5 5 0 0010 0" stroke="#d4b483" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="8" y1="12" x2="8" y2="15" stroke="#d4b483" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            )}
           </button>
           <button
             type="submit"
