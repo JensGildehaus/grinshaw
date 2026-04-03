@@ -162,7 +162,6 @@ export default function Home() {
               width: "auto",
               marginBottom: "0.75rem",
               borderRadius: "2px",
-              border: "1px solid var(--g-border)",
             }}
             priority
           />
