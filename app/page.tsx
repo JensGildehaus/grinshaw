@@ -199,6 +199,7 @@ export default function Home() {
             alignItems: "center",
             padding: "1.5rem 0 0.75rem",
             flexShrink: 0,
+            flex: messages.length === 0 ? 1 : "0 0 auto",
           }}
         >
           <div style={{ position: "relative", marginBottom: "0.75rem" }}>
@@ -240,7 +241,7 @@ export default function Home() {
         </div>
 
         {/* Nachrichten */}
-        <div style={{ flex: 1, overflowY: "auto" }}>
+        <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0 }}>
           {messages.map((m, i) => (
             <div
               key={i}
