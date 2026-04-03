@@ -256,21 +256,21 @@ export default function Home() {
               {m.role === "assistant" && (
                 <div
                   style={{
-                    width: "40px",
-                    height: "40px",
+                    width: "48px",
+                    height: "48px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     flexShrink: 0,
-                    border: "1px solid var(--g-border)",
+                    background: "#1e4a28",
                     marginTop: "2px",
                   }}
                 >
                   <Image
                     src="/butler.png"
                     alt="Grinshaw"
-                    width={40}
-                    height={40}
-                    style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                    width={48}
+                    height={48}
+                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.15)" }}
                   />
                 </div>
               )}
@@ -308,20 +308,20 @@ export default function Home() {
             >
               <div
                 style={{
-                  width: "28px",
-                  height: "28px",
+                  width: "48px",
+                  height: "48px",
                   borderRadius: "50%",
                   overflow: "hidden",
                   flexShrink: 0,
-                  border: "1px solid var(--g-border)",
+                  background: "#1e4a28",
                 }}
               >
                 <Image
-                  src="/avatar.png"
+                  src="/butler.png"
                   alt="Grinshaw"
-                  width={28}
-                  height={28}
-                  style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                  width={48}
+                  height={48}
+                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.15)" }}
                 />
               </div>
               <p
