@@ -13,6 +13,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Grinshaw",
   description: "Ihr persönlicher Butler. Ob Sie es wünschen oder nicht.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/icon-192.png",
+  },
 };
 
 export default function RootLayout({
