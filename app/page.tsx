@@ -150,9 +150,10 @@ export default function Home() {
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
           <a
             href="/angelegenheiten"
+            className="nav-angelegenheiten-header"
             style={{
               fontSize: "0.72rem",
-              color: "var(--g-muted)",
+              color: "var(--g-text)",
               letterSpacing: "0.06em",
               textDecoration: "none",
               fontFamily: "var(--font-playfair), Georgia, serif",
@@ -166,7 +167,7 @@ export default function Home() {
             style={{
               background: "transparent",
               border: "none",
-              color: "var(--g-muted)",
+              color: "var(--g-text)",
               fontSize: "0.72rem",
               cursor: "pointer",
               fontFamily: "inherit",
@@ -396,7 +397,8 @@ export default function Home() {
             style={{
               background: "transparent",
               border: "none",
-              color: listening ? "var(--g-gold)" : "var(--g-muted)",
+              color: "var(--g-gold)",
+              opacity: listening ? 1 : 0.7,
               cursor: "pointer",
               padding: "0.35rem 0.25rem",
               fontSize: "1rem",
@@ -411,15 +413,15 @@ export default function Home() {
             type="submit"
             disabled={loading || !input.trim()}
             style={{
-              background: loading || !input.trim() ? "transparent" : "var(--g-gold)",
+              background: input.trim() && !loading ? "var(--g-gold)" : "transparent",
               border: "1px solid var(--g-gold)",
-              color: loading || !input.trim() ? "var(--g-gold)" : "#1a2e20",
+              color: input.trim() && !loading ? "#1a2e20" : "var(--g-gold)",
               fontSize: "0.7rem",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               padding: "0.35rem 1rem",
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-              opacity: loading || !input.trim() ? 0.35 : 1,
+              opacity: loading ? 0.4 : 1,
               fontFamily: "var(--font-playfair), Georgia, serif",
               transition: "all 0.2s",
               whiteSpace: "nowrap",
