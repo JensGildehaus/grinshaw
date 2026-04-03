@@ -106,20 +106,35 @@ export default function Angelegenheiten() {
         >
           Grinshaw
         </Link>
-        <span
-          style={{
-            fontSize: "0.65rem",
-            color: "var(--g-muted)",
-            letterSpacing: "0.08em",
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            textTransform: "uppercase",
-            textAlign: "right",
-          }}
-        >
-          Die laufenden
-          <br />
-          Angelegenheiten
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+          <span
+            style={{
+              fontSize: "0.65rem",
+              color: "var(--g-muted)",
+              letterSpacing: "0.08em",
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              textTransform: "uppercase",
+              textAlign: "right",
+            }}
+          >
+            Die laufenden
+            <br />
+            Angelegenheiten
+          </span>
+          <Link
+            href="/"
+            style={{
+              fontSize: "0.72rem",
+              color: "var(--g-muted)",
+              letterSpacing: "0.06em",
+              textDecoration: "none",
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              textTransform: "uppercase",
+            }}
+          >
+            ← Chat
+          </Link>
+        </div>
       </header>
 
       <div
