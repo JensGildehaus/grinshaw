@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 
 export default function Angelegenheiten() {
@@ -38,14 +37,15 @@ export default function Angelegenheiten() {
         </Link>
         <span
           style={{
-            fontSize: "0.72rem",
+            fontSize: "0.65rem",
             color: "var(--g-muted)",
-            letterSpacing: "0.06em",
+            letterSpacing: "0.08em",
             fontFamily: "var(--font-playfair), Georgia, serif",
             textTransform: "uppercase",
+            textAlign: "right",
           }}
         >
-          Die laufenden Angelegenheiten
+          Die laufenden<br />Angelegenheiten
         </span>
       </header>
 
