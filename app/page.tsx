@@ -12,7 +12,13 @@ interface Message {
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("grinshaw-chat");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
@@ -56,6 +62,10 @@ export default function Home() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  useEffect(() => {
+    localStorage.setItem("grinshaw-chat", JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
@@ -108,6 +118,7 @@ export default function Home() {
   }
 
   async function logout() {
+    localStorage.removeItem("grinshaw-chat");
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
