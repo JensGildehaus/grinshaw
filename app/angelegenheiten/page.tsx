@@ -249,7 +249,7 @@ export default function Angelegenheiten() {
                       key={task.id}
                       style={{
                         display: "flex",
-                        alignItems: "flex-start",
+                        alignItems: "center",
                         gap: "0.85rem",
                         padding: "0.7rem 0.6rem 0.7rem 0.9rem",
                         borderLeft: `2px solid ${task.status === "done" ? "rgba(212,180,131,0.2)" : PRIORITY_COLOR[task.priority] ?? "var(--g-muted)"}`,
@@ -302,7 +302,6 @@ export default function Angelegenheiten() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          marginTop: "1px",
                           transition: "all 0.2s",
                         }}
                       >
