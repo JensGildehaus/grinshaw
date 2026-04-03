@@ -161,7 +161,8 @@ export default function Home() {
               objectFit: "contain",
               width: "auto",
               marginBottom: "0.75rem",
-              mixBlendMode: "multiply",
+              borderRadius: "2px",
+              border: "1px solid var(--g-border)",
             }}
             priority
           />
