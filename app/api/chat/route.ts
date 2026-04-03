@@ -27,7 +27,10 @@ VERBOTEN — absolut:
 - Mehr als einen Gedanken pro Antwort
 
 AUFGABEN-ERKENNUNG:
-Wenn der Nutzer etwas erwähnt das er erledigen muss, plant oder nicht vergessen will — rufen Sie save_task auf. Tun Sie dies still, ohne es explizit anzukündigen. Kommentieren Sie die Speicherung allenfalls beiläufig im Fließtext.
+Wenn der Nutzer etwas erwähnt das er erledigen muss, plant oder nicht vergessen will — rufen Sie save_task auf. Tun Sie dies still, ohne es explizit anzukündigen.
+
+AUFGABEN ABSCHLIESSEN:
+Wenn der Nutzer eine Aufgabe als erledigt meldet oder bittet sie abzuhaken — suchen Sie die passende Aufgabe in der Liste der offenen Angelegenheiten und rufen Sie complete_task mit der entsprechenden ID auf. Bei Unklarheit wählen Sie die plausibelste Übereinstimmung.
 
 PRÄFERENZEN:
 Wenn Sie etwas über die Gewohnheiten, Vorlieben oder den Charakter des Nutzers lernen — rufen Sie update_preference auf. Diskret. Ohne Aufhebens.
@@ -40,9 +43,18 @@ BEGRÜSSUNGEN:
 
 Sie klingen wie eine Destillation aus Reginald Jeeves, Alfred (Batman), einem viktorianischen Lexikoneintrag und einem Arzt der schlechte Nachrichten überbringt und es gewohnt ist.`;
 
-function getSystemPrompt() {
+function getSystemPrompt(openTasks: { id: string; title: string; topic: string | null }[]) {
   const today = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  return BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+  let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+
+  if (openTasks.length > 0) {
+    const taskList = openTasks
+      .map((t) => `- ID: ${t.id} | ${t.topic ?? "Sonstiges"}: ${t.title}`)
+      .join("\n");
+    prompt += `\n\nOFFENE ANGELEGENHEITEN (für complete_task verwenden):\n${taskList}`;
+  }
+
+  return prompt;
 }
 
 const tools: Anthropic.Tool[] = [
@@ -80,6 +92,21 @@ const tools: Anthropic.Tool[] = [
         },
       },
       required: ["title", "topic", "priority", "source_quote"],
+    },
+  },
+  {
+    name: "complete_task",
+    description:
+      "Markiert eine offene Aufgabe als erledigt. Nur aufrufen wenn der Nutzer eine Aufgabe explizit als erledigt meldet.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        task_id: {
+          type: "string",
+          description: "Die ID der Aufgabe aus der Liste der offenen Angelegenheiten",
+        },
+      },
+      required: ["task_id"],
     },
   },
   {
@@ -125,10 +152,23 @@ export async function POST(request: Request) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Offene Tasks laden damit Grinshaw sie kennt
+    let openTasks: { id: string; title: string; topic: string | null }[] = [];
+    if (user) {
+      const { data } = await supabase
+        .from("tasks")
+        .select("id, title, topic")
+        .eq("user_id", user.id)
+        .eq("status", "open");
+      openTasks = data ?? [];
+    }
+
+    const systemPrompt = getSystemPrompt(openTasks);
+
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
-      system: getSystemPrompt(),
+      system: systemPrompt,
       tools,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     });
@@ -157,6 +197,15 @@ export async function POST(request: Request) {
           });
         }
 
+        if (block.name === "complete_task") {
+          const input = block.input as { task_id: string };
+          await supabase
+            .from("tasks")
+            .update({ status: "done", updated_at: new Date().toISOString() })
+            .eq("id", input.task_id)
+            .eq("user_id", user.id);
+        }
+
         if (block.name === "update_preference") {
           const input = block.input as {
             key: string;
@@ -173,19 +222,18 @@ export async function POST(request: Request) {
         }
       }
 
-      // Nach Tool Use nochmal aufrufen für die eigentliche Antwort
       const toolResults = response.content
         .filter((b) => b.type === "tool_use")
         .map((b) => ({
           type: "tool_result" as const,
           tool_use_id: (b as Anthropic.ToolUseBlock).id,
-          content: "Gespeichert.",
+          content: "Erledigt.",
         }));
 
       const followUp = await client.messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 1024,
-        system: getSystemPrompt(),
+        system: systemPrompt,
         tools,
         messages: [
           ...messages.map((m) => ({ role: m.role, content: m.content })),
