@@ -175,6 +175,7 @@ export default function Home() {
               objectFit: "contain",
               width: "auto",
               marginBottom: "0.75rem",
+              mixBlendMode: "multiply",
             }}
             priority
           />
