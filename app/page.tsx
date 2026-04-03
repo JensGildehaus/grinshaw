@@ -100,6 +100,7 @@ export default function Home() {
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
           <a
             href="/angelegenheiten"
+            className="nav-angelegenheiten"
             style={{
               fontSize: "0.72rem",
               color: "var(--g-muted)",
@@ -155,12 +156,12 @@ export default function Home() {
             alt="Grinshaw"
             width={220}
             height={330}
+            className="butler-img"
             style={{
               objectFit: "contain",
-              height: "280px",
               width: "auto",
               marginBottom: "0.75rem",
-              mixBlendMode: "luminosity",
+              mixBlendMode: "multiply",
             }}
             priority
           />

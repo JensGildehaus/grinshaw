@@ -38,3 +38,22 @@ body {
   background: var(--g-border);
   border-radius: 2px;
 }
+
+/* Responsive Helfer */
+.nav-angelegenheiten {
+  display: none;
+}
+
+.butler-img {
+  height: 180px;
+}
+
+@media (min-width: 640px) {
+  .nav-angelegenheiten {
+    display: block;
+  }
+
+  .butler-img {
+    height: 260px;
+  }
+}
