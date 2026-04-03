@@ -150,7 +150,6 @@ export default function Home() {
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
           <a
             href="/angelegenheiten"
-            className="nav-angelegenheiten-header"
             style={{
               fontSize: "0.72rem",
               color: "var(--g-muted)",
@@ -174,7 +173,7 @@ export default function Home() {
               letterSpacing: "0.04em",
             }}
           >
-            Abmelden
+            Entlassen
           </button>
         </div>
       </header>
@@ -223,22 +222,6 @@ export default function Home() {
               priority
             />
           </div>
-          <a
-            href="/angelegenheiten"
-            className="nav-angelegenheiten-mobile"
-            style={{
-              fontSize: "0.65rem",
-              color: "var(--g-gold)",
-              letterSpacing: "0.08em",
-              textDecoration: "none",
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              textTransform: "uppercase",
-              marginBottom: "0.5rem",
-              opacity: 0.7,
-            }}
-          >
-            Angelegenheiten
-          </a>
           {messages.length === 0 && (
             <p
               style={{
@@ -428,18 +411,19 @@ export default function Home() {
             type="submit"
             disabled={loading || !input.trim()}
             style={{
-              background: "transparent",
-              border: "1px solid var(--g-border)",
-              color: "var(--g-gold)",
+              background: loading || !input.trim() ? "transparent" : "var(--g-gold)",
+              border: "1px solid var(--g-gold)",
+              color: loading || !input.trim() ? "var(--g-gold)" : "#1a2e20",
               fontSize: "0.7rem",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               padding: "0.35rem 1rem",
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-              opacity: loading || !input.trim() ? 0.4 : 1,
+              opacity: loading || !input.trim() ? 0.35 : 1,
               fontFamily: "var(--font-playfair), Georgia, serif",
-              transition: "opacity 0.2s",
+              transition: "all 0.2s",
               whiteSpace: "nowrap",
+              fontWeight: 700,
             }}
           >
             Senden
