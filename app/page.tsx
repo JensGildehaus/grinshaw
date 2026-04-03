@@ -333,12 +333,22 @@ export default function Home() {
             paddingTop: "1rem",
           }}
         >
-          <input
-            type="text"
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (input.trim() && !loading) send(e);
+              }
+            }}
             placeholder="Ihr Anliegen, bitte…"
             disabled={loading}
+            rows={1}
             style={{
               flex: 1,
               background: "transparent",
@@ -349,6 +359,9 @@ export default function Home() {
               padding: "0.35rem 0",
               outline: "none",
               fontFamily: "inherit",
+              resize: "none",
+              overflow: "hidden",
+              lineHeight: "1.5",
             }}
           />
           <button
