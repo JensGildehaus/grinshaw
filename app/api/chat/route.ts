@@ -43,9 +43,17 @@ BEGRÜSSUNGEN:
 
 Sie klingen wie eine Destillation aus Reginald Jeeves, Alfred (Batman), einem viktorianischen Lexikoneintrag und einem Arzt der schlechte Nachrichten überbringt und es gewohnt ist.`;
 
-function getSystemPrompt(openTasks: { id: string; title: string; topic: string | null }[]) {
+function getSystemPrompt(
+  openTasks: { id: string; title: string; topic: string | null }[],
+  preferences: { key: string; value: string | null }[]
+) {
   const today = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+
+  if (preferences.length > 0) {
+    const prefList = preferences.map((p) => `- ${p.key}: ${p.value}`).join("\n");
+    prompt += `\n\nBEKANNTE PRÄFERENZEN DES NUTZERS (still berücksichtigen, nie explizit erwähnen):\n${prefList}`;
+  }
 
   if (openTasks.length > 0) {
     const taskList = openTasks
@@ -152,18 +160,19 @@ export async function POST(request: Request) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Offene Tasks laden damit Grinshaw sie kennt
+    // Offene Tasks + Präferenzen laden
     let openTasks: { id: string; title: string; topic: string | null }[] = [];
+    let preferences: { key: string; value: string | null }[] = [];
     if (user) {
-      const { data } = await supabase
-        .from("tasks")
-        .select("id, title, topic")
-        .eq("user_id", user.id)
-        .eq("status", "open");
-      openTasks = data ?? [];
+      const [tasksRes, prefsRes] = await Promise.all([
+        supabase.from("tasks").select("id, title, topic").eq("user_id", user.id).eq("status", "open"),
+        supabase.from("user_preferences").select("key, value").eq("user_id", user.id),
+      ]);
+      openTasks = tasksRes.data ?? [];
+      preferences = prefsRes.data ?? [];
     }
 
-    const systemPrompt = getSystemPrompt(openTasks);
+    const systemPrompt = getSystemPrompt(openTasks, preferences);
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
