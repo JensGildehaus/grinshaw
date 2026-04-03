@@ -22,6 +22,17 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [weather, setWeather] = useState<string | null>(null);
+
+  const GREETINGS = [
+    '„Ah. Sie sind es."',
+    '„Man ist da. Was auch immer das wert sein mag."',
+    '„Man hat gewartet. Es fiel nicht schwer."',
+    '„Man ist zur Stelle. Wie gewohnt."',
+    '„Man hat die Türe nicht gehört. Dennoch ist man hier."',
+    '„Man tritt ein. Bitte erschrecken Sie nicht."',
+  ];
+  const [greeting] = useState(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,6 +69,27 @@ export default function Home() {
     setListening(true);
   }
 
+
+  useEffect(() => {
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=51.2977&longitude=6.8497&current=temperature_2m,weathercode&timezone=Europe/Berlin")
+      .then((r) => r.json())
+      .then((d) => {
+        const temp = Math.round(d.current.temperature_2m);
+        const code = d.current.weathercode as number;
+        const condition =
+          code === 0 ? "Wolkenlos" :
+          code <= 2 ? "Leicht bewölkt" :
+          code === 3 ? "Bedeckt" :
+          code <= 48 ? "Neblig" :
+          code <= 57 ? "Nieselregen" :
+          code <= 67 ? "Regen" :
+          code <= 77 ? "Schnee" :
+          code <= 82 ? "Schauer" :
+          "Gewitter";
+        setWeather(`${temp}°C · ${condition}`);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -238,18 +270,30 @@ export default function Home() {
             />
           </div>
           {messages.length === 0 && (
-            <p
-              style={{
-                fontSize: "0.82rem",
-                color: "var(--g-text)",
-                textAlign: "center",
-                maxWidth: "320px",
-                lineHeight: "1.7",
-                fontStyle: "italic",
-              }}
-            >
-              „Ah. Sie sind es."
-            </p>
+            <div style={{ textAlign: "center" }}>
+              <p
+                style={{
+                  fontSize: "0.82rem",
+                  color: "var(--g-text)",
+                  maxWidth: "320px",
+                  lineHeight: "1.7",
+                  fontStyle: "italic",
+                  margin: "0 0 0.4rem",
+                }}
+              >
+                {greeting}
+              </p>
+              {weather && (
+                <p style={{
+                  fontSize: "0.7rem",
+                  color: "var(--g-muted)",
+                  letterSpacing: "0.06em",
+                  margin: 0,
+                }}>
+                  {weather}
+                </p>
+              )}
+            </div>
           )}
         </div>
 
