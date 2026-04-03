@@ -17,6 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const router = useRouter();
@@ -78,6 +79,7 @@ export default function Home() {
     const next: Message[] = [...messages, { role: "user", content: text }];
     setMessages(next);
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     setLoading(true);
 
     try {
@@ -374,11 +376,13 @@ export default function Home() {
           style={{
             display: "flex",
             gap: "0.75rem",
+            alignItems: "flex-end",
             borderTop: "1px solid var(--g-border)",
             paddingTop: "1rem",
           }}
         >
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
