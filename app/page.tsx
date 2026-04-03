@@ -166,7 +166,7 @@ export default function Home() {
           }}
         >
           <Image
-            src="/avatar-freigestellt.png"
+            src="/avatar-transparent.png"
             alt="Grinshaw"
             width={220}
             height={330}
@@ -175,7 +175,6 @@ export default function Home() {
               objectFit: "contain",
               width: "auto",
               marginBottom: "0.75rem",
-              mixBlendMode: "multiply",
             }}
             priority
           />
