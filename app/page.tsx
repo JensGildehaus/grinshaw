@@ -287,11 +287,12 @@ export default function Home() {
             style={{
               background: "transparent",
               border: "none",
-              color: "var(--g-text)",
-              fontSize: "0.72rem",
+              color: "var(--g-muted)",
+              fontSize: "0.65rem",
               cursor: "pointer",
               fontFamily: "inherit",
-              letterSpacing: "0.04em",
+              letterSpacing: "0.02em",
+              opacity: 0.7,
             }}
           >
             Entlassen
@@ -376,11 +377,13 @@ export default function Home() {
 
         {/* Nachrichten */}
         <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0 }}>
-          {messages.map((m, i) => (
+          {messages.map((m, i) => {
+            const isFirstInGroup = i === 0 || messages[i - 1].role !== m.role;
+            return (
             <div
               key={i}
               style={{
-                marginBottom: "1.25rem",
+                marginBottom: isFirstInGroup ? "1.25rem" : "0.4rem",
                 display: "flex",
                 gap: "0.75rem",
                 alignItems: "flex-start",
@@ -388,48 +391,33 @@ export default function Home() {
               }}
             >
               {m.role === "assistant" && (
-                <div
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    flexShrink: 0,
-
-                    marginTop: "2px",
-                  }}
-                >
-                  <Image
-                    src="/kopf-butler.png"
-                    alt="Grinshaw"
-                    width={48}
-                    height={48}
-                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }}
-                  />
-                </div>
+                isFirstInGroup ? (
+                  <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, marginTop: "2px" }}>
+                    <Image src="/kopf-butler.png" alt="Grinshaw" width={48} height={48}
+                      style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }} />
+                  </div>
+                ) : (
+                  <div style={{ width: "48px", flexShrink: 0 }} />
+                )
               )}
               <div
                 style={{
-                  maxWidth: "80%",
-                  padding: "0.65rem 0.9rem",
-                  borderRadius: "4px",
+                  maxWidth: "78%",
+                  padding: m.role === "user" ? "0.6rem 0.9rem" : "0.1rem 0 0.1rem 0.85rem",
                   fontSize: "0.875rem",
-                  lineHeight: "1.7",
-                  background:
-                    m.role === "user"
-                      ? "rgba(0,0,0,0.2)"
-                      : "transparent",
-                  border:
-                    m.role === "user"
-                      ? "1px solid var(--g-border)"
-                      : "none",
+                  lineHeight: "1.75",
+                  background: m.role === "user" ? "rgba(0,0,0,0.22)" : "transparent",
+                  border: m.role === "user" ? "1px solid var(--g-border)" : "none",
+                  borderLeft: m.role === "assistant" ? "2px solid rgba(212,180,131,0.45)" : undefined,
+                  borderRadius: m.role === "user" ? "4px" : undefined,
                   color: "var(--g-text)",
                 }}
               >
                 {m.content}
               </div>
             </div>
-          ))}
+            );
+          })}
 
           {loading && (
             <div
@@ -508,7 +496,7 @@ export default function Home() {
             display: "flex",
             gap: "0.75rem",
             alignItems: "flex-end",
-            borderTop: "1px solid var(--g-border)",
+            borderTop: "1px solid rgba(212,180,131,0.4)",
             paddingTop: "1rem",
           }}
         >
