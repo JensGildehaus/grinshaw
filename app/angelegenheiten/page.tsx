@@ -181,20 +181,45 @@ export default function Angelegenheiten() {
         ) : (
           topics.map((topic) => (
             <div key={topic} style={{ marginBottom: "2.5rem" }}>
-              <p
-                style={{
-                  fontSize: "0.6rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "var(--g-muted)",
+              {/* Namensschild */}
+              <div style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0.55rem 2.5rem",
+                marginBottom: "1rem",
+                background: "linear-gradient(180deg, rgba(212,180,131,0.11) 0%, rgba(212,180,131,0.05) 50%, rgba(212,180,131,0.09) 100%)",
+                border: "1px solid rgba(212,180,131,0.55)",
+                boxShadow: "inset 0 1px 0 rgba(212,180,131,0.18), inset 0 0 0 3px rgba(212,180,131,0.07)",
+              }}>
+                {/* Schrauben */}
+                {([
+                  { top: "5px", left: "7px" },
+                  { top: "5px", right: "7px" },
+                  { bottom: "5px", left: "7px" },
+                  { bottom: "5px", right: "7px" },
+                ] as React.CSSProperties[]).map((pos, i) => (
+                  <div key={i} style={{
+                    position: "absolute",
+                    ...pos,
+                    width: "5px",
+                    height: "5px",
+                    borderRadius: "50%",
+                    background: "radial-gradient(circle at 35% 35%, rgba(212,180,131,0.9), rgba(212,180,131,0.3))",
+                    boxShadow: "0 0 2px rgba(0,0,0,0.4)",
+                  }} />
+                ))}
+                <span style={{
                   fontFamily: "var(--font-playfair), Georgia, serif",
-                  marginBottom: "0.75rem",
-                  paddingBottom: "0.4rem",
-                  borderBottom: "1px solid var(--g-border)",
-                }}
-              >
-                {topic}
-              </p>
+                  fontSize: "0.95rem",
+                  color: "var(--g-gold)",
+                  fontStyle: "italic",
+                  letterSpacing: "0.05em",
+                }}>
+                  {topic}
+                </span>
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {grouped[topic].map((task) => {
                   const dateStr = formatDate(task.due_date);
