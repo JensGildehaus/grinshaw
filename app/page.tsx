@@ -283,7 +283,7 @@ export default function Home() {
                     alt="Grinshaw"
                     width={48}
                     height={48}
-                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.18)" }}
+                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.28)" }}
                   />
                 </div>
               )}

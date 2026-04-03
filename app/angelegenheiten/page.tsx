@@ -121,19 +121,6 @@ export default function Angelegenheiten() {
             <br />
             Angelegenheiten
           </span>
-          <Link
-            href="/"
-            style={{
-              fontSize: "0.72rem",
-              color: "var(--g-muted)",
-              letterSpacing: "0.06em",
-              textDecoration: "none",
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              textTransform: "uppercase",
-            }}
-          >
-            ← Chat
-          </Link>
         </div>
       </header>
 
@@ -320,6 +307,29 @@ export default function Angelegenheiten() {
           ))
         )}
       </div>
+
+      {/* Floating Chat Button */}
+      <Link
+        href="/"
+        style={{
+          position: "fixed",
+          bottom: "1.5rem",
+          left: "1.5rem",
+          background: "var(--g-bg)",
+          border: "1px solid var(--g-gold)",
+          color: "var(--g-gold)",
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: "0.7rem",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          textDecoration: "none",
+          padding: "0.75rem 1.25rem",
+          fontWeight: 700,
+          zIndex: 50,
+        }}
+      >
+        Chat
+      </Link>
     </div>
   );
 }
