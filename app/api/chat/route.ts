@@ -47,8 +47,10 @@ function getSystemPrompt(
   openTasks: { id: string; title: string; topic: string | null }[],
   preferences: { key: string; value: string | null }[]
 ) {
-  const today = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+  const now = new Date();
+  const today = now.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const time = now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}, ${time} Uhr. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
 
   if (preferences.length > 0) {
     const prefList = preferences.map((p) => `- ${p.key}: ${p.value}`).join("\n");
