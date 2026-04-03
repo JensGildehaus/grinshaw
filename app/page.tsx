@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import { InstallPrompt } from "./components/InstallPrompt";
 
 interface Message {
   role: "user" | "assistant";
@@ -24,7 +25,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-    navigator.serviceWorker.register("/sw.js").then(async (reg) => {
+    navigator.serviceWorker.ready.then(async (reg) => {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") return;
       const existing = await reg.pushManager.getSubscription();
@@ -78,6 +79,8 @@ export default function Home() {
   }
 
   return (
+    <>
+    <InstallPrompt />
     <div
       style={{
         minHeight: "100%",
@@ -394,5 +397,6 @@ export default function Home() {
         </div>
       </form>
     </div>
+    </>
   );
 }

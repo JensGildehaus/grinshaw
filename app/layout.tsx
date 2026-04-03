@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { InstallPromptProvider } from "./components/InstallPromptProvider";
+import { SwRegister } from "./components/SwRegister";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -20,7 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className={`${playfair.variable} h-full`}>
-      <body className="h-full">{children}</body>
+      <body className="h-full">
+        <InstallPromptProvider>
+          <SwRegister />
+          {children}
+        </InstallPromptProvider>
+      </body>
     </html>
   );
 }
