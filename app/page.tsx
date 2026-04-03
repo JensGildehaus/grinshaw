@@ -100,7 +100,7 @@ export default function Home() {
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
           <a
             href="/angelegenheiten"
-            className="nav-angelegenheiten"
+            className="nav-angelegenheiten-header"
             style={{
               fontSize: "0.72rem",
               color: "var(--g-muted)",
@@ -165,6 +165,21 @@ export default function Home() {
             }}
             priority
           />
+          <a
+            href="/angelegenheiten"
+            className="nav-angelegenheiten-mobile"
+            style={{
+              fontSize: "0.65rem",
+              color: "var(--g-muted)",
+              letterSpacing: "0.08em",
+              textDecoration: "none",
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              textTransform: "uppercase",
+              marginBottom: "0.5rem",
+            }}
+          >
+            Angelegenheiten
+          </a>
           {messages.length === 0 && (
             <p
               style={{
