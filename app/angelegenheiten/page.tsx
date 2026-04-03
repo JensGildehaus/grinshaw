@@ -235,10 +235,10 @@ export default function Angelegenheiten() {
                 </span>
                 {/* Chevron */}
                 <svg
-                  width="12" height="12" viewBox="0 0 12 12" fill="none"
-                  style={{ position: "absolute", right: "14px", opacity: 0.6, transition: "transform 0.2s", transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                  width="10" height="6" viewBox="0 0 10 6" fill="none"
+                  style={{ position: "absolute", right: "14px", opacity: 0.55, transition: "transform 0.2s", transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
                 >
-                  <path d="M2 4l4 4 4-4" stroke="#d4b483" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M1 1l4 4 4-4" stroke="#d4b483" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
               {!isCollapsed && <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -294,8 +294,8 @@ export default function Angelegenheiten() {
                         style={{
                           background: task.status === "done" ? "rgba(212,180,131,0.15)" : "transparent",
                           border: `1px solid ${task.status === "done" ? "rgba(212,180,131,0.6)" : "rgba(212,180,131,0.25)"}`,
-                          width: "22px",
-                          height: "22px",
+                          width: "16px",
+                          height: "16px",
                           borderRadius: "50%",
                           flexShrink: 0,
                           cursor: "pointer",
