@@ -15,9 +15,41 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
   const router = useRouter();
   const supabase = createClient();
+
+  function toggleVoice() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+
+    const recognition = new SR();
+    recognition.lang = "de-DE";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput((prev: string) => prev ? prev + " " + transcript : transcript);
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+
+    recognition.start();
+    setListening(true);
+  }
 
 
   useEffect(() => {
@@ -374,6 +406,24 @@ export default function Home() {
               lineHeight: "1.5",
             }}
           />
+          <button
+            type="button"
+            onClick={toggleVoice}
+            title={listening ? "Aufnahme stoppen" : "Sprechen"}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: listening ? "var(--g-gold)" : "var(--g-muted)",
+              cursor: "pointer",
+              padding: "0.35rem 0.25rem",
+              fontSize: "1rem",
+              lineHeight: 1,
+              transition: "color 0.2s",
+              flexShrink: 0,
+            }}
+          >
+            {listening ? "⏹" : "🎙"}
+          </button>
           <button
             type="submit"
             disabled={loading || !input.trim()}
