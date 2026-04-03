@@ -376,7 +376,8 @@ export default function Home() {
         </div>
 
         {/* Nachrichten */}
-        <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0 }}>
+        <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1 }} />
           {messages.map((m, i) => {
             const isFirstInGroup = i === 0 || messages[i - 1].role !== m.role;
             return (
@@ -403,13 +404,12 @@ export default function Home() {
               <div
                 style={{
                   maxWidth: "78%",
-                  padding: m.role === "user" ? "0.6rem 0.9rem" : "0.1rem 0 0.1rem 0.85rem",
+                  padding: m.role === "user" ? "0.5rem 0.85rem" : "0.1rem 0 0.1rem 0.85rem",
                   fontSize: "0.875rem",
                   lineHeight: "1.75",
-                  background: m.role === "user" ? "rgba(0,0,0,0.22)" : "transparent",
-                  border: m.role === "user" ? "1px solid var(--g-border)" : "none",
+                  background: m.role === "user" ? "rgba(0,0,0,0.18)" : "transparent",
+                  border: m.role === "user" ? "1px solid rgba(212,180,131,0.25)" : "none",
                   borderLeft: m.role === "assistant" ? "2px solid rgba(212,180,131,0.45)" : undefined,
-                  borderRadius: m.role === "user" ? "4px" : undefined,
                   color: "var(--g-text)",
                 }}
               >
