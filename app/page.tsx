@@ -150,14 +150,14 @@ export default function Home() {
           <Image
             src="/avatar.png"
             alt="Grinshaw"
-            width={180}
-            height={270}
+            width={220}
+            height={330}
             style={{
               objectFit: "contain",
-              height: "220px",
+              height: "280px",
               width: "auto",
               marginBottom: "0.75rem",
-              opacity: 0.92,
+              mixBlendMode: "luminosity",
             }}
             priority
           />
