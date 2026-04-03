@@ -39,14 +39,17 @@ export default function Home() {
         body: JSON.stringify({ messages: next }),
       });
       const data = await res.json();
-      setMessages([...next, { role: "assistant", content: data.content }]);
-    } catch {
+      if (data.error) {
+        setMessages([...next, { role: "assistant", content: `[Fehler: ${data.error}]` }]);
+      } else {
+        setMessages([...next, { role: "assistant", content: data.content }]);
+      }
+    } catch (err) {
       setMessages([
         ...next,
         {
           role: "assistant",
-          content:
-            "Die Verbindung zu meiner Wenigkeit ist — vorübergehend, wie ich betonen möchte — unterbrochen. Dies ist zweifellos auf Umstände zurückzuführen, die außerhalb meiner Kontrolle liegen.",
+          content: `[Netzwerkfehler: ${err instanceof Error ? err.message : String(err)}]`,
         },
       ]);
     } finally {

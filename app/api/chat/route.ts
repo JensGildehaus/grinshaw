@@ -36,20 +36,25 @@ interface Message {
 }
 
 export async function POST(request: Request) {
-  const { messages }: { messages: Message[] } = await request.json();
+  try {
+    const { messages }: { messages: Message[] } = await request.json();
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-    })),
-  });
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      system: SYSTEM_PROMPT,
+      messages: messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    });
 
-  const content =
-    response.content[0].type === "text" ? response.content[0].text : "";
+    const content =
+      response.content[0].type === "text" ? response.content[0].text : "";
 
-  return Response.json({ content });
+    return Response.json({ content });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return Response.json({ error: message }, { status: 500 });
+  }
 }
