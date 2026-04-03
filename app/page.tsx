@@ -404,7 +404,7 @@ export default function Home() {
                     alt="Grinshaw"
                     width={48}
                     height={48}
-                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.5)" }}
+                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }}
                   />
                 </div>
               )}
@@ -454,7 +454,7 @@ export default function Home() {
                   alt="Grinshaw"
                   width={48}
                   height={48}
-                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.5)" }}
+                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }}
                 />
               </div>
               <p
