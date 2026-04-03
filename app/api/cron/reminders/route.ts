@@ -1,9 +1,19 @@
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
+import { timingSafeEqual } from "crypto";
+
+function safeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    if (bufA.length !== bufB.length) return false;
+    return timingSafeEqual(bufA, bufB);
+  } catch { return false; }
+}
 
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  const auth = request.headers.get("authorization") ?? "";
+  if (!safeCompare(auth, `Bearer ${process.env.CRON_SECRET}`)) {
     return Response.json({ error: "Unbefugter Zugriff." }, { status: 401 });
   }
 
@@ -73,4 +83,5 @@ export async function GET(request: Request) {
   }
 
   return Response.json({ sent });
+
 }

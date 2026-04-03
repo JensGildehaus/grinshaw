@@ -26,15 +26,17 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("push", (event) => {
   if (!event.data) return;
-  const { title, body } = event.data.json();
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
-      data: { url: "/angelegenheiten" },
-    })
-  );
+  try {
+    const { title, body } = event.data.json();
+    event.waitUntil(
+      self.registration.showNotification(title ?? "Grinshaw", {
+        body: body ?? "",
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        data: { url: "/angelegenheiten" },
+      })
+    );
+  } catch { /* malformed push data — ignorieren */ }
 });
 
 self.addEventListener("notificationclick", (event) => {

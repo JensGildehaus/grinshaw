@@ -3,7 +3,12 @@ import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
   try {
-    const subscription = await request.json();
+    const body = await request.json();
+    // Subscription-Objekt validieren — nur erlaubte Felder
+    if (!body?.endpoint || typeof body.endpoint !== "string" || !body.endpoint.startsWith("https://")) {
+      return Response.json({ error: "Ungültige Subscription." }, { status: 400 });
+    }
+    const subscription = body;
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -32,8 +37,7 @@ export async function POST(request: Request) {
     });
 
     return Response.json({ ok: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ error: message }, { status: 500 });
+  } catch {
+    return Response.json({ error: "Interner Fehler." }, { status: 500 });
   }
 }

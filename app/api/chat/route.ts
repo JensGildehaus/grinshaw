@@ -269,8 +269,7 @@ export async function POST(request: Request) {
 
     const content = response.content.find((b) => b.type === "text");
     return Response.json({ content: content?.type === "text" ? content.text : "" });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ error: message }, { status: 500 });
+  } catch {
+    return Response.json({ error: "Interner Fehler." }, { status: 500 });
   }
 }
