@@ -353,6 +353,7 @@ export default function Home() {
       >
         <a
           href="/angelegenheiten"
+          className="nav-angelegenheiten-mobile"
           style={{
             display: "block",
             textAlign: "center",
