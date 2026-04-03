@@ -41,7 +41,8 @@ body {
 
 /* Responsive Helfer */
 .nav-angelegenheiten {
-  display: none;
+  display: block;
+  font-size: 0.6rem;
 }
 
 .butler-img {
@@ -50,7 +51,7 @@ body {
 
 @media (min-width: 640px) {
   .nav-angelegenheiten {
-    display: block;
+    font-size: 0.72rem;
   }
 
   .butler-img {
