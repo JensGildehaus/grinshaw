@@ -165,19 +165,28 @@ export default function Home() {
             flexShrink: 0,
           }}
         >
-          <Image
-            src="/avatar-transparent.png"
-            alt="Grinshaw"
-            width={220}
-            height={330}
-            className="butler-img"
-            style={{
-              objectFit: "contain",
-              width: "auto",
-              marginBottom: "0.75rem",
-            }}
-            priority
-          />
+          <div style={{ position: "relative", marginBottom: "0.75rem" }}>
+            <div style={{
+              position: "absolute",
+              inset: "-30px",
+              background: "radial-gradient(circle, rgba(212,180,131,0.18) 0%, transparent 70%)",
+              borderRadius: "50%",
+              pointerEvents: "none",
+            }} />
+            <Image
+              src="/avatar-transparent.png"
+              alt="Grinshaw"
+              width={220}
+              height={330}
+              className="butler-img"
+              style={{
+                objectFit: "contain",
+                width: "auto",
+                position: "relative",
+              }}
+              priority
+            />
+          </div>
           <a
             href="/angelegenheiten"
             className="nav-angelegenheiten-mobile"
