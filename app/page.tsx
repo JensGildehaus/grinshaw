@@ -199,7 +199,7 @@ export default function Home() {
             <p
               style={{
                 fontSize: "0.82rem",
-                color: "var(--g-muted)",
+                color: "var(--g-text)",
                 textAlign: "center",
                 maxWidth: "320px",
                 lineHeight: "1.7",
@@ -261,8 +261,7 @@ export default function Home() {
                     m.role === "user"
                       ? "1px solid var(--g-border)"
                       : "none",
-                  color:
-                    m.role === "user" ? "var(--g-muted)" : "var(--g-text)",
+                  color: "var(--g-text)",
                 }}
               >
                 {m.content}
@@ -300,7 +299,7 @@ export default function Home() {
               <p
                 style={{
                   fontSize: "0.82rem",
-                  color: "var(--g-muted)",
+                  color: "var(--g-text)",
                   fontStyle: "italic",
                   marginTop: "4px",
                 }}
