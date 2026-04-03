@@ -22,6 +22,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className={`${playfair.variable} h-full`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.__grinshawInstallPrompt = e;
+          });
+        `}} />
+      </head>
       <body className="h-full">
         <InstallPromptProvider>
           <SwRegister />

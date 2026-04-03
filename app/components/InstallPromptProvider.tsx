@@ -25,6 +25,10 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    // Bereits vor React-Mount gefangen?
+    const early = (window as Window & { __grinshawInstallPrompt?: BeforeInstallPromptEvent }).__grinshawInstallPrompt;
+    if (early) setDeferredPrompt(early);
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
