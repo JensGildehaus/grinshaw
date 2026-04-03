@@ -166,7 +166,7 @@ export default function Home() {
           }}
         >
           <Image
-            src="/avatar.png"
+            src="/avatar-freigestellt.png"
             alt="Grinshaw"
             width={220}
             height={330}
@@ -175,8 +175,6 @@ export default function Home() {
               objectFit: "contain",
               width: "auto",
               marginBottom: "0.75rem",
-              maskImage: "radial-gradient(ellipse 78% 96% at 50% 50%, black 60%, transparent 90%)",
-              WebkitMaskImage: "radial-gradient(ellipse 78% 96% at 50% 50%, black 60%, transparent 90%)",
             }}
             priority
           />
@@ -185,12 +183,13 @@ export default function Home() {
             className="nav-angelegenheiten-mobile"
             style={{
               fontSize: "0.65rem",
-              color: "var(--g-muted)",
+              color: "var(--g-gold)",
               letterSpacing: "0.08em",
               textDecoration: "none",
               fontFamily: "var(--font-playfair), Georgia, serif",
               textTransform: "uppercase",
               marginBottom: "0.5rem",
+              opacity: 0.7,
             }}
           >
             Angelegenheiten
