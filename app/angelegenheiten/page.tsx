@@ -49,6 +49,15 @@ export default function Angelegenheiten() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"open" | "done" | "all">("open");
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+
+  function toggleTopic(topic: string) {
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      next.has(topic) ? next.delete(topic) : next.add(topic);
+      return next;
+    });
+  }
   const supabase = createClient();
 
   useEffect(() => {
@@ -179,19 +188,24 @@ export default function Angelegenheiten() {
               : "\u201eSie haben mir bislang nichts aufgetragen. Das ist entweder sehr entspannt oder sehr beunruhigend.\u201c"}
           </p>
         ) : (
-          topics.map((topic) => (
+          topics.map((topic) => {
+            const isCollapsed = collapsed.has(topic);
+            return (
             <div key={topic} style={{ marginBottom: "2.5rem" }}>
               {/* Namensschild */}
-              <div style={{
+              <div
+                onClick={() => toggleTopic(topic)}
+                style={{
                 position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "0.55rem 2.5rem",
-                marginBottom: "1rem",
+                marginBottom: isCollapsed ? 0 : "1rem",
                 background: "linear-gradient(180deg, rgba(212,180,131,0.11) 0%, rgba(212,180,131,0.05) 50%, rgba(212,180,131,0.09) 100%)",
                 border: "1px solid rgba(212,180,131,0.55)",
                 boxShadow: "inset 0 1px 0 rgba(212,180,131,0.18), inset 0 0 0 3px rgba(212,180,131,0.07)",
+                cursor: "pointer",
               }}>
                 {/* Schrauben */}
                 {([
@@ -219,8 +233,15 @@ export default function Angelegenheiten() {
                 }}>
                   {topic}
                 </span>
+                {/* Chevron */}
+                <svg
+                  width="12" height="12" viewBox="0 0 12 12" fill="none"
+                  style={{ position: "absolute", right: "14px", opacity: 0.6, transition: "transform 0.2s", transform: isCollapsed ? "rotate(-90deg)" : "rotate(0deg)" }}
+                >
+                  <path d="M2 4l4 4 4-4" stroke="#d4b483" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {!isCollapsed && <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {grouped[topic].map((task) => {
                   const dateStr = formatDate(task.due_date);
                   const isOverdue = dateStr?.startsWith("überfällig");
@@ -327,9 +348,10 @@ export default function Angelegenheiten() {
                     </div>
                   );
                 })}
-              </div>
+              </div>}
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
