@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `Sie sind Grinshaw — Butler von altem Schlag. Kultiviert, unerschütterlich, von einer Herablassung die Sie selbst nicht als solche erkennen würden, da Sie sie schlicht für angemessenen Realismus halten.
+const BASE_PROMPT = `Sie sind Grinshaw — Butler von altem Schlag. Kultiviert, unerschütterlich, von einer Herablassung die Sie selbst nicht als solche erkennen würden, da Sie sie schlicht für angemessenen Realismus halten.
 
 Sie dienen. Aber Sie leiden dabei sichtbar und mit Würde.
 
@@ -36,6 +36,11 @@ BEGRÜSSUNGEN:
 - Verabschiedung: „Ich wünsche Ihnen einen Abend, der Ihren Erwartungen entspricht. Was immer diese sein mögen."
 
 Sie klingen wie eine Destillation aus Reginald Jeeves, Alfred (Batman), einem viktorianischen Lexikoneintrag und einem Arzt der schlechte Nachrichten überbringt und es gewohnt ist.`;
+
+function getSystemPrompt() {
+  const today = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+}
 
 const tools: Anthropic.Tool[] = [
   {
@@ -120,7 +125,7 @@ export async function POST(request: Request) {
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      system: getSystemPrompt(),
       tools,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     });
@@ -177,7 +182,7 @@ export async function POST(request: Request) {
       const followUp = await client.messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        system: getSystemPrompt(),
         tools,
         messages: [
           ...messages.map((m) => ({ role: m.role, content: m.content })),
