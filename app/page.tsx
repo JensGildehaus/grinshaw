@@ -218,8 +218,7 @@ export default function Home() {
                 fontStyle: "italic",
               }}
             >
-              „Ah. Sie sind es. Man hat mich informiert, dass Sie Bedarf
-              angemeldet haben."
+              „Ah. Sie sind es."
             </p>
           )}
         </div>
