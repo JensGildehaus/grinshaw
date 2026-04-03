@@ -5,7 +5,6 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { InstallPrompt } from "./components/InstallPrompt";
-import { useInstallPrompt } from "./components/InstallPromptProvider";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,29 +15,10 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showInstallHint, setShowInstallHint] = useState(false);
-  const [isAndroidBrowser, setIsAndroidBrowser] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
-  const { deferredPrompt, clearPrompt } = useInstallPrompt();
 
-  useEffect(() => {
-    const android = /Android/i.test(navigator.userAgent);
-    const standalone = window.matchMedia("(display-mode: standalone)").matches;
-    setIsAndroidBrowser(android && !standalone);
-  }, []);
-
-  async function handleInstall() {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") clearPrompt();
-      setIsAndroidBrowser(false);
-    } else {
-      setShowInstallHint(true);
-    }
-  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -150,29 +130,6 @@ export default function Home() {
           >
             Angelegenheiten
           </a>
-          {isAndroidBrowser && (
-            <button
-              onClick={handleInstall}
-              title="Als App installieren"
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "var(--g-gold)",
-                fontSize: "0.72rem",
-                cursor: "pointer",
-                fontFamily: "var(--font-playfair), Georgia, serif",
-                letterSpacing: "0.04em",
-                opacity: 0.7,
-              }}
-            >
-              ↓ App
-            </button>
-          )}
-          {showInstallHint && (
-            <span style={{ fontSize: "0.65rem", color: "var(--g-muted)", maxWidth: "140px", lineHeight: 1.4 }}>
-              Menü → App installieren
-            </span>
-          )}
           <button
             onClick={logout}
             style={{
