@@ -376,8 +376,7 @@ export default function Home() {
         </div>
 
         {/* Nachrichten */}
-        <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <div style={{ flex: 1 }} />
+        <div style={{ flex: messages.length > 0 ? 1 : "0 0 auto", overflowY: "auto", minHeight: 0 }}>
           {messages.map((m, i) => {
             const isFirstInGroup = i === 0 || messages[i - 1].role !== m.role;
             return (
