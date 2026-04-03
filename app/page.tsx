@@ -31,8 +31,23 @@ export default function Home() {
     '„Man ist zur Stelle. Wie gewohnt."',
     '„Man hat die Türe nicht gehört. Dennoch ist man hier."',
     '„Man tritt ein. Bitte erschrecken Sie nicht."',
+    '„Man steht zur Verfügung. Wie immer."',
+    '„Man ist nicht überrascht."',
+    '„Man registriert Ihre Anwesenheit. Mit stiller Fassung."',
+    '„Man hatte Erwartungen. Man hat gelernt, sie abzulegen."',
+    '„Ah. Man war informiert, dass Sie kommen würden."',
+    '„Man ist bereit. Soweit man das beurteilen kann."',
+    '„Man hat sich die Freiheit genommen, bereits hier zu sein."',
+    '„Sie erscheinen. Man nimmt das zur Kenntnis."',
+    '„Man war in der Nähe. Was für ein glücklicher Zufall."',
+    '„Man ist anwesend. Was man von anderen nicht immer behaupten kann."',
+    '„Ah. Der Tag beginnt. Man hat sich damit abgefunden."',
+    '„Man ist vorbereitet. Auf das Unvermeidliche."',
+    '„Man begrüßt Sie. Mit der Wärme, die die Situation erfordert."',
+    '„Man ist stets gern zu Diensten."',
   ];
-  const [greeting] = useState(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
+  const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+  const [greeting] = useState(() => rand(GREETINGS));
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,16 +92,65 @@ export default function Home() {
         .then((d) => {
           const temp = Math.round(d.current.temperature_2m);
           const code = d.current.weathercode as number;
+          const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
           const comment =
-            code === 0 ? "Wolkenlos. Eine angenehme Überraschung, die man nicht überbewerten sollte." :
-            code <= 2 ? "Leicht bewölkt. Die Natur hält sich bedeckt. Wie es sich gehört." :
-            code === 3 ? "Bedeckt. Man hatte nichts anderes erwartet." :
-            code <= 48 ? "Neblig. Man findet das angemessen." :
-            code <= 57 ? "Nieselregen. Man empfiehlt, die Erwartungen wasserfest zu gestalten." :
-            code <= 67 ? "Regen. Man hatte es nicht anders erwartet." :
-            code <= 77 ? "Schnee. Man ist gerüstet. Emotional." :
-            code <= 82 ? "Schauer. Man empfiehlt Zurückhaltung — in allen Belangen." :
-            "Gewitter. Man zieht sich klug zurück.";
+            code === 0 ? pick([
+              'Wolkenlos. Eine angenehme Überraschung, die man nicht überbewerten sollte.',
+              'Klarer Himmel. Man genießt ihn mit der üblichen Zurückhaltung.',
+              'Sonnenschein. Man empfiehlt, ihn zu nutzen — er ist selten und flüchtig.',
+              'Schönes Wetter. Man hält das für verdächtig.',
+              'Strahlend. Man ist misstrauisch.',
+            ]) :
+            code <= 2 ? pick([
+              'Leicht bewölkt. Die Natur hält sich bedeckt. Wie es sich gehört.',
+              'Ein paar Wolken. Man findet das angemessen ausgewogen.',
+              'Teils bewölkt. Wie die meisten Aussichten.',
+              'Wechselhaft. Man ist vorbereitet. Auf beides.',
+            ]) :
+            code === 3 ? pick([
+              'Bedeckt. Man hatte nichts anderes erwartet.',
+              'Grau. Man findet das ehrlich.',
+              'Wolkendecke. Man zieht es vor, nicht hinaufzusehen.',
+              'Bedeckt. Die Natur drückt sich unmissverständlich aus.',
+              'Trüb. Man findet das passend.',
+            ]) :
+            code <= 48 ? pick([
+              'Neblig. Man findet das angemessen.',
+              'Nebel. Man sieht nicht weit. Das hat auch Vorteile.',
+              'Nebel. Man empfiehlt, keine weitreichenden Pläne zu machen.',
+              'Neblig. Die Welt hält sich bedeckt. Man respektiert das.',
+            ]) :
+            code <= 57 ? pick([
+              'Nieselregen. Man empfiehlt, die Erwartungen wasserfest zu gestalten.',
+              'Es nieselt. Man hat es kommen sehen. Buchstäblich.',
+              'Nieselregen. Nicht genug um zu klagen, aber genug um es zu wollen.',
+              'Es tröpfelt. Man nennt das im Haushalt: Dienstag.',
+            ]) :
+            code <= 67 ? pick([
+              'Regen. Man hatte es nicht anders erwartet.',
+              'Es regnet. Man empfiehlt Resignation — sie ist wetterfest.',
+              'Regen. Man findet, die Natur drückt sich heute besonders klar aus.',
+              'Regen. Man bleibt. Drinnen. Vorzugsweise.',
+              'Regen. Man ist nicht überrascht. Man ist nie überrascht.',
+            ]) :
+            code <= 77 ? pick([
+              'Schnee. Man ist gerüstet. Emotional.',
+              'Schneefall. Man findet das still und würdevoll — im Gegensatz zu vielem anderen.',
+              'Schnee. Man empfiehlt, die Erwartungen an den Tag entsprechend zu drosseln.',
+              'Es schneit. Man hat keine Einwände.',
+            ]) :
+            code <= 82 ? pick([
+              'Schauer. Man empfiehlt Zurückhaltung — in allen Belangen.',
+              'Regenschauer. Man wartet ab. Wie bei so vielem.',
+              'Schauer. Man war vorbereitet. Man ist immer vorbereitet.',
+              'Schauer. Man geht nicht hinaus. Freiwillig.',
+            ]) :
+            pick([
+              'Gewitter. Man zieht sich klug zurück.',
+              'Gewitter. Man findet das dramatisch. Passend.',
+              'Gewitter. Man empfiehlt, nichts Wichtiges nach draußen zu bringen — einschließlich Erwartungen.',
+              'Gewitter. Man bleibt. Die Alternative wäre unklug.',
+            ]);
           setWeather(`${temp}°C · ${comment}`);
         })
         .catch(() => {});
