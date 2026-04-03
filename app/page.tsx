@@ -404,7 +404,7 @@ export default function Home() {
                     alt="Grinshaw"
                     width={48}
                     height={48}
-                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.28)" }}
+                    style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.5)" }}
                   />
                 </div>
               )}
@@ -447,15 +447,14 @@ export default function Home() {
                   borderRadius: "50%",
                   overflow: "hidden",
                   flexShrink: 0,
-                  background: "#1e4a28",
                 }}
               >
                 <Image
-                  src="/butler.png"
+                  src="/kopf-butler.png"
                   alt="Grinshaw"
                   width={48}
                   height={48}
-                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.15)" }}
+                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.5)" }}
                 />
               </div>
               <p
