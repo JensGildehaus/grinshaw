@@ -159,6 +159,7 @@ export async function POST(request: Request) {
     );
 
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return Response.json({ error: "Nicht autorisiert." }, { status: 401 });
 
     // Offene Tasks + Präferenzen laden
     let openTasks: { id: string; title: string; topic: string | null }[] = [];
