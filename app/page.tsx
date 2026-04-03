@@ -161,8 +161,8 @@ export default function Home() {
               objectFit: "contain",
               width: "auto",
               marginBottom: "0.75rem",
-              maskImage: "radial-gradient(ellipse 68% 78% at 50% 48%, black 45%, transparent 80%)",
-              WebkitMaskImage: "radial-gradient(ellipse 68% 78% at 50% 48%, black 45%, transparent 80%)",
+              maskImage: "radial-gradient(ellipse 78% 96% at 50% 50%, black 60%, transparent 90%)",
+              WebkitMaskImage: "radial-gradient(ellipse 78% 96% at 50% 50%, black 60%, transparent 90%)",
             }}
             priority
           />
