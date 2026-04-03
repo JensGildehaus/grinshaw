@@ -197,8 +197,8 @@ export default function Home() {
               {m.role === "assistant" && (
                 <div
                   style={{
-                    width: "28px",
-                    height: "28px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     flexShrink: 0,
@@ -209,8 +209,8 @@ export default function Home() {
                   <Image
                     src="/butler.png"
                     alt="Grinshaw"
-                    width={28}
-                    height={28}
+                    width={40}
+                    height={40}
                     style={{ objectFit: "cover", width: "100%", height: "100%" }}
                   />
                 </div>
