@@ -315,12 +315,12 @@ export default function Home() {
         {/* Butler-Figur */}
         <div
           style={{
-            display: "flex",
+            display: messages.length > 0 ? "none" : "flex",
             flexDirection: "column",
             alignItems: "center",
             padding: "1.5rem 0 0.75rem",
             flexShrink: 0,
-            flex: messages.length === 0 ? 1 : "0 0 auto",
+            flex: 1,
           }}
         >
           <div style={{ position: "relative", marginBottom: "0.75rem" }}>
@@ -394,7 +394,7 @@ export default function Home() {
                 isFirstInGroup ? (
                   <div style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, marginTop: "2px" }}>
                     <Image src="/kopf-butler.png" alt="Grinshaw" width={48} height={48}
-                      style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }} />
+                      style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.55)" }} />
                   </div>
                 ) : (
                   <div style={{ width: "48px", flexShrink: 0 }} />
@@ -442,7 +442,7 @@ export default function Home() {
                   alt="Grinshaw"
                   width={48}
                   height={48}
-                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.62)" }}
+                  style={{ objectFit: "cover", width: "100%", height: "100%", transform: "scale(1.55)" }}
                 />
               </div>
               <p
