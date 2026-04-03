@@ -71,24 +71,35 @@ export default function Home() {
 
 
   useEffect(() => {
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=51.2977&longitude=6.8497&current=temperature_2m,weathercode&timezone=Europe/Berlin")
-      .then((r) => r.json())
-      .then((d) => {
-        const temp = Math.round(d.current.temperature_2m);
-        const code = d.current.weathercode as number;
-        const condition =
-          code === 0 ? "Wolkenlos" :
-          code <= 2 ? "Leicht bewölkt" :
-          code === 3 ? "Bedeckt" :
-          code <= 48 ? "Neblig" :
-          code <= 57 ? "Nieselregen" :
-          code <= 67 ? "Regen" :
-          code <= 77 ? "Schnee" :
-          code <= 82 ? "Schauer" :
-          "Gewitter";
-        setWeather(`${temp}°C · ${condition}`);
-      })
-      .catch(() => {});
+    function fetchWeather(lat: number, lon: number) {
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`)
+        .then((r) => r.json())
+        .then((d) => {
+          const temp = Math.round(d.current.temperature_2m);
+          const code = d.current.weathercode as number;
+          const comment =
+            code === 0 ? "Wolkenlos. Eine angenehme Überraschung, die man nicht überbewerten sollte." :
+            code <= 2 ? "Leicht bewölkt. Die Natur hält sich bedeckt. Wie es sich gehört." :
+            code === 3 ? "Bedeckt. Man hatte nichts anderes erwartet." :
+            code <= 48 ? "Neblig. Man findet das angemessen." :
+            code <= 57 ? "Nieselregen. Man empfiehlt, die Erwartungen wasserfest zu gestalten." :
+            code <= 67 ? "Regen. Man hatte es nicht anders erwartet." :
+            code <= 77 ? "Schnee. Man ist gerüstet. Emotional." :
+            code <= 82 ? "Schauer. Man empfiehlt Zurückhaltung — in allen Belangen." :
+            "Gewitter. Man zieht sich klug zurück.";
+          setWeather(`${temp}°C · ${comment}`);
+        })
+        .catch(() => {});
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        () => fetchWeather(51.2977, 6.8497)
+      );
+    } else {
+      fetchWeather(51.2977, 6.8497);
+    }
   }, []);
 
   useEffect(() => {
@@ -285,10 +296,12 @@ export default function Home() {
               </p>
               {weather && (
                 <p style={{
-                  fontSize: "0.7rem",
-                  color: "var(--g-muted)",
-                  letterSpacing: "0.06em",
-                  margin: 0,
+                  fontSize: "0.82rem",
+                  color: "var(--g-text)",
+                  fontStyle: "italic",
+                  maxWidth: "320px",
+                  lineHeight: "1.7",
+                  margin: "0 auto",
                 }}>
                   {weather}
                 </p>
