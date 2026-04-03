@@ -143,28 +143,24 @@ export default function Home() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "2rem 0 1rem",
+            padding: "1.5rem 0 0.75rem",
             flexShrink: 0,
           }}
         >
-          <div
+          <Image
+            src="/avatar.png"
+            alt="Grinshaw"
+            width={180}
+            height={270}
             style={{
-              width: "96px",
-              height: "96px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              border: "1px solid var(--g-border)",
+              objectFit: "contain",
+              height: "220px",
+              width: "auto",
               marginBottom: "0.75rem",
+              opacity: 0.92,
             }}
-          >
-            <Image
-              src="/avatar.png"
-              alt="Grinshaw"
-              width={96}
-              height={96}
-              style={{ objectFit: "cover", width: "100%", height: "100%" }}
-            />
-          </div>
+            priority
+          />
           {messages.length === 0 && (
             <p
               style={{
@@ -208,7 +204,7 @@ export default function Home() {
                   }}
                 >
                   <Image
-                    src="/avatar.png"
+                    src="/butler.png"
                     alt="Grinshaw"
                     width={28}
                     height={28}
