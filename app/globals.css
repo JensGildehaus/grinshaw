@@ -40,7 +40,7 @@ body {
 }
 
 ::placeholder {
-  color: rgba(240, 232, 216, 0.5);
+  color: rgba(240, 232, 216, 0.3);
 }
 
 /* Responsive Helfer */
