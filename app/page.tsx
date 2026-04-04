@@ -12,13 +12,7 @@ interface Message {
 }
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const saved = localStorage.getItem("grinshaw-chat");
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
@@ -170,9 +164,6 @@ export default function Home() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  useEffect(() => {
-    localStorage.setItem("grinshaw-chat", JSON.stringify(messages));
-  }, [messages]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
