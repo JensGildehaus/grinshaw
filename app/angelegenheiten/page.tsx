@@ -208,13 +208,7 @@ export default function Angelegenheiten() {
           <p style={{ fontSize: "0.82rem", color: "var(--g-muted)", fontStyle: "italic" }}>
             Ich sichte Ihre Unterlagen. Einen Moment, bitte.
           </p>
-        ) : visible.length === 0 ? (
-          <p style={{ fontSize: "0.82rem", color: "var(--g-muted)", fontStyle: "italic", lineHeight: "1.7" }}>
-            {filter === "done"
-              ? "\u201eNichts erledigt. Das erklärt einiges.\u201c"
-              : "\u201eSie haben mir bislang nichts aufgetragen. Das ist entweder sehr entspannt oder sehr beunruhigend.\u201c"}
-          </p>
-        ) : (
+        ) : visible.length === 0 ? null : (
           topics.map((topic) => {
             const isCollapsed = collapsed.has(topic);
             return (
