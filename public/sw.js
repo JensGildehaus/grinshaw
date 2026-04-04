@@ -32,7 +32,7 @@ self.addEventListener("push", (event) => {
       self.registration.showNotification(title ?? "Grinshaw", {
         body: body ?? "",
         icon: "/icon-192.png",
-        badge: "/icon-192.png",
+        badge: "/kopf-butler.png",
         data: { url: "/angelegenheiten" },
       })
     );
