@@ -45,6 +45,19 @@ function formatDate(iso: string | null): { text: string; tone: "urgent" | "today
   return { text: d.toLocaleDateString("de-DE", { day: "numeric", month: "long" }), tone: "normal" };
 }
 
+function buildComment(tasks: Task[]): string {
+  const open = tasks.filter((t) => t.status === "open" || t.status === "snoozed");
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const overdue = open.filter((t) => t.due_date && new Date(t.due_date) < today);
+  const high = open.filter((t) => t.priority === "high");
+
+  if (open.length === 0) return '\u201eKeine offenen Angelegenheiten. Man wei\u00df nicht, ob das beruhigend oder verd\u00e4chtig ist.\u201c';
+  if (overdue.length > 0 && overdue.length === open.length) return `\u201e${open.length} Angelegenheit${open.length !== 1 ? "en" : ""}, alle \u00fcberf\u00e4llig. Man h\u00e4lt sich bedeckt.\u201c`;
+  if (overdue.length > 0) return `\u201e${open.length} offen, ${overdue.length} davon \u00fcberf\u00e4llig. Man registriert das mit stiller Fassung.\u201c`;
+  if (high.length > 0) return `\u201e${open.length} Angelegenheit${open.length !== 1 ? "en" : ""}, ${high.length} dringend. Man empfiehlt, die Reihenfolge zu \u00fcberdenken.\u201c`;
+  return `\u201e${open.length} offene Angelegenheit${open.length !== 1 ? "en" : ""}. Man hat die Hoffnung noch nicht aufgegeben.\u201c`;
+}
+
 export default function Angelegenheiten() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,6 +188,20 @@ export default function Angelegenheiten() {
             </button>
           ))}
         </div>
+
+        {/* Grinshaw-Kommentar */}
+        {!loading && (
+          <p style={{
+            fontSize: "0.78rem",
+            color: "var(--g-muted)",
+            fontStyle: "italic",
+            lineHeight: "1.6",
+            marginBottom: "1.5rem",
+            marginTop: "-0.5rem",
+          }}>
+            {buildComment(tasks)}
+          </p>
+        )}
 
         {/* Inhalt */}
         {loading ? (
