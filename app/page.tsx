@@ -236,10 +236,11 @@ export default function Home() {
     <InstallPrompt />
     <div
       style={{
-        minHeight: "100%",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        overflow: "hidden",
       }}
     >
       {/* Header */}
@@ -522,7 +523,7 @@ export default function Home() {
               border: "none",
               borderBottom: "1px solid var(--g-border)",
               color: "var(--g-text)",
-              fontSize: "0.875rem",
+              fontSize: "1rem",
               padding: "0.35rem 0",
               outline: "none",
               fontFamily: "inherit",

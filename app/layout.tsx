@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="de" className={`${playfair.variable} h-full`}>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
         <script dangerouslySetInnerHTML={{ __html: `
           window.addEventListener('beforeinstallprompt', function(e) {
             e.preventDefault();
