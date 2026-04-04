@@ -17,31 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [weather, setWeather] = useState<string | null>(null);
-
-  const GREETINGS = [
-    '„Ah. Sie sind es."',
-    '„Man ist da. Was auch immer das wert sein mag."',
-    '„Man hat gewartet. Es fiel nicht schwer."',
-    '„Man ist zur Stelle. Wie gewohnt."',
-    '„Man hat die Türe nicht gehört. Dennoch ist man hier."',
-    '„Man tritt ein. Bitte erschrecken Sie nicht."',
-    '„Man steht zur Verfügung. Wie immer."',
-    '„Man ist nicht überrascht."',
-    '„Man registriert Ihre Anwesenheit. Mit stiller Fassung."',
-    '„Man hatte Erwartungen. Man hat gelernt, sie abzulegen."',
-    '„Ah. Man war informiert, dass Sie kommen würden."',
-    '„Man ist bereit. Soweit man das beurteilen kann."',
-    '„Man hat sich die Freiheit genommen, bereits hier zu sein."',
-    '„Sie erscheinen. Man nimmt das zur Kenntnis."',
-    '„Man war in der Nähe. Was für ein glücklicher Zufall."',
-    '„Man ist anwesend. Was man von anderen nicht immer behaupten kann."',
-    '„Ah. Der Tag beginnt. Man hat sich damit abgefunden."',
-    '„Man ist vorbereitet. Auf das Unvermeidliche."',
-    '„Man begrüßt Sie. Mit der Wärme, die die Situation erfordert."',
-    '„Man ist stets gern zu Diensten."',
-  ];
-  const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-  const [greeting] = useState(() => rand(GREETINGS));
+  const [greeting, setGreeting] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,6 +153,13 @@ export default function Home() {
       });
       await fetch("/api/push", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(sub) });
     });
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/greeting")
+      .then((r) => r.json())
+      .then((d) => { if (d.greeting) setGreeting(d.greeting); })
+      .catch(() => setGreeting("\u201eMan ist zur Stelle.\u201c"));
   }, []);
 
   async function send(e: React.SyntheticEvent) {
