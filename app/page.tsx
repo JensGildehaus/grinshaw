@@ -5,6 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import { InstallPrompt } from "./components/InstallPrompt";
+import { ReminderBell } from "./components/ReminderBell";
 
 interface Message {
   role: "user" | "assistant";
@@ -260,6 +261,7 @@ export default function Home() {
           Grinshaw
         </span>
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+          <ReminderBell />
           <a
             href="/angelegenheiten"
             className="nav-angelegenheiten-header"
