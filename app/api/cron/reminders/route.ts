@@ -82,6 +82,13 @@ export async function GET(request: Request) {
       .in("id", ids);
   }
 
+  // Erledigte Aufgaben älter als 3 Tage löschen
+  await supabase
+    .from("tasks")
+    .delete()
+    .eq("status", "done")
+    .lt("updated_at", new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString());
+
   return Response.json({ sent });
 
 }
