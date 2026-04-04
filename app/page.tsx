@@ -211,12 +211,12 @@ export default function Home() {
       } else {
         setMessages([...next, { role: "assistant", content: data.content }]);
       }
-    } catch (err) {
+    } catch {
       setMessages([
         ...next,
         {
           role: "assistant",
-          content: `[Netzwerkfehler: ${err instanceof Error ? err.message : String(err)}]`,
+          content: "[Man kann die Verbindung derzeit nicht herstellen. Man wartet ab.]",
         },
       ]);
     } finally {

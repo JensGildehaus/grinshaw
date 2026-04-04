@@ -148,7 +148,18 @@ interface Message {
 
 export async function POST(request: Request) {
   try {
-    const { messages }: { messages: Message[] } = await request.json();
+    const body = await request.json();
+    const raw: unknown[] = Array.isArray(body?.messages) ? body.messages : [];
+
+    // Nachrichten validieren und begrenzen
+    const messages: Message[] = raw
+      .filter((m): m is Message =>
+        typeof m === "object" && m !== null &&
+        (m as Message).role === "user" || (m as Message).role === "assistant" &&
+        typeof (m as Message).content === "string"
+      )
+      .slice(-50)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
 
     const cookieStore = await cookies();
     const supabase = createServerClient(
