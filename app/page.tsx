@@ -310,7 +310,7 @@ export default function Home() {
             display: messages.length > 0 ? "none" : "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "1.5rem 0 0.75rem",
+            padding: "0.5rem 0 0.5rem",
             flexShrink: 0,
             flex: 1,
           }}
