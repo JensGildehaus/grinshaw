@@ -310,9 +310,9 @@ export default function Home() {
             display: messages.length > 0 ? "none" : "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "0.5rem 0 0.5rem",
+            padding: "1.5rem 0 0.75rem",
             flexShrink: 0,
-            flex: 1,
+            flex: "0 0 auto",
           }}
         >
           <div style={{ position: "relative", marginBottom: "0.75rem" }}>
