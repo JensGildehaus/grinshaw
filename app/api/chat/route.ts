@@ -49,9 +49,10 @@ function getSystemPrompt(
   preferences: { key: string; value: string | null }[]
 ) {
   const now = new Date();
-  const today = now.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const time = now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
-  let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}, ${time} Uhr. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen.`;
+  const today = now.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const localTime = now.toLocaleTimeString("de-DE", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit" });
+  const utcTime = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
+  let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Ortszeit: ${localTime} Uhr · UTC: ${utcTime} Uhr. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen. Bei due_time stets UTC-Zeit im Format HH:MM speichern — „in 10 Minuten" Ortszeit korrekt in UTC umrechnen.`;
 
   if (preferences.length > 0) {
     const prefList = preferences.map((p) => `- ${p.key}: ${p.value}`).join("\n");
@@ -92,6 +93,10 @@ const tools: Anthropic.Tool[] = [
         due_date: {
           type: "string",
           description: "ISO-Datum (YYYY-MM-DD), nur wenn erkennbar",
+        },
+        due_time: {
+          type: "string",
+          description: "Uhrzeit als UTC HH:MM, nur wenn der Nutzer eine konkrete Zeit nennt (z.B. 'in 10 Minuten', 'um 15 Uhr'). Ortszeit in UTC umrechnen.",
         },
         priority: {
           type: "string",
@@ -198,6 +203,7 @@ export async function POST(request: Request) {
             priority: string;
             source_quote: string;
             due_date?: string;
+            due_time?: string;
           };
           await supabase.from("tasks").insert({
             user_id: user.id,
@@ -206,6 +212,7 @@ export async function POST(request: Request) {
             priority: input.priority,
             source_quote: input.source_quote,
             due_date: input.due_date || null,
+            due_time: input.due_time || null,
             status: "open",
           });
         }
