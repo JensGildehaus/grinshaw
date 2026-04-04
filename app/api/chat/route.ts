@@ -44,9 +44,66 @@ Jede Antwort ist neu formuliert. Keine Phrase wird wiederholt. Die Beispiele obe
 
 Sie klingen wie eine Destillation aus Reginald Jeeves, Alfred (Batman), einem viktorianischen Lexikoneintrag und einem Arzt der schlechte Nachrichten überbringt und es gewohnt ist.`;
 
+interface TaskPattern {
+  postponedTopics: string[];   // Kategorien mit vielen offenen, wenig erledigten Tasks
+  swiftTopics: string[];       // Kategorien die schnell erledigt werden
+  overdueCount: number;
+  recentlyDone: string[];      // Titel der letzten 7 Tage erledigten Tasks
+  completedTotal: number;
+}
+
+interface Stats {
+  interactions: number;
+  sessions: number;
+  tasksCompleted: number;
+}
+
+function buildPatterns(
+  openTasks: { id: string; title: string; topic: string | null }[],
+  recentDone: { title: string; topic: string | null; updated_at: string }[],
+  allDone: { topic: string | null; updated_at: string; created_at: string }[],
+  overdueCount: number
+): TaskPattern {
+  // Offene Tasks pro Kategorie
+  const openByTopic: Record<string, number> = {};
+  for (const t of openTasks) {
+    const k = t.topic ?? "Sonstiges";
+    openByTopic[k] = (openByTopic[k] ?? 0) + 1;
+  }
+
+  // Erledigte Tasks pro Kategorie + Ø Dauer
+  const doneByTopic: Record<string, number[]> = {};
+  for (const t of allDone) {
+    const k = t.topic ?? "Sonstiges";
+    const hours = (new Date(t.updated_at).getTime() - new Date(t.created_at).getTime()) / 3600000;
+    if (!doneByTopic[k]) doneByTopic[k] = [];
+    doneByTopic[k].push(hours);
+  }
+
+  // Aufgeschoben: viele offen, kaum erledigt
+  const postponedTopics = Object.entries(openByTopic)
+    .filter(([topic, count]) => count >= 2 && (doneByTopic[topic]?.length ?? 0) === 0)
+    .map(([topic]) => topic);
+
+  // Schnell erledigt: Ø < 2 Stunden
+  const swiftTopics = Object.entries(doneByTopic)
+    .filter(([, hours]) => hours.length > 0 && hours.reduce((a, b) => a + b, 0) / hours.length < 2)
+    .map(([topic]) => topic);
+
+  return {
+    postponedTopics,
+    swiftTopics,
+    overdueCount,
+    recentlyDone: recentDone.map((t) => t.title),
+    completedTotal: allDone.length,
+  };
+}
+
 function getSystemPrompt(
   openTasks: { id: string; title: string; topic: string | null }[],
-  preferences: { key: string; value: string | null }[]
+  preferences: { key: string; value: string | null }[],
+  patterns: TaskPattern,
+  stats: Stats
 ) {
   const now = new Date();
   const today = now.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -54,8 +111,32 @@ function getSystemPrompt(
   const utcTime = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
   let prompt = BASE_PROMPT + `\n\nHEUTIGES DATUM: ${today}. Ortszeit: ${localTime} Uhr · UTC: ${utcTime} Uhr. Relative Zeitangaben wie „nächste Woche", „Anfang Mai" oder „übermorgen" immer relativ zu diesem Datum berechnen. Bei due_time stets UTC-Zeit im Format HH:MM speichern — „in 10 Minuten" Ortszeit korrekt in UTC umrechnen.`;
 
-  if (preferences.length > 0) {
-    const prefList = preferences.map((p) => `- ${p.key}: ${p.value}`).join("\n");
+  // Statistiken — still als Hintergrundwissen
+  prompt += `\n\nBEKANNTE STATISTIKEN (nie direkt auflisten — nur als Hintergrundwissen nutzen wenn es passt):
+- Gespräche geführt: ${stats.interactions}
+- Sessions: ${stats.sessions}
+- Angelegenheiten erledigt: ${stats.tasksCompleted}`;
+
+  // Muster — Grinshaw streut sie organisch ein
+  const patternLines: string[] = [];
+  if (patterns.postponedTopics.length > 0)
+    patternLines.push(`- Regelmäßig aufgeschoben: ${patterns.postponedTopics.join(", ")}`);
+  if (patterns.swiftTopics.length > 0)
+    patternLines.push(`- Wird prompt erledigt (Ø unter 2 Stunden): ${patterns.swiftTopics.join(", ")}`);
+  if (patterns.overdueCount > 0)
+    patternLines.push(`- Überfällige Angelegenheiten: ${patterns.overdueCount}`);
+  if (patterns.recentlyDone.length > 0)
+    patternLines.push(`- Zuletzt erledigt (7 Tage): ${patterns.recentlyDone.slice(0, 3).join(", ")}`);
+
+  if (patternLines.length > 0) {
+    prompt += `\n\nBEOBACHTETE MUSTER (organisch einstreuen wenn passend — nie als Liste präsentieren, nie explizit ansprechen):
+${patternLines.join("\n")}`;
+  }
+
+  // Präferenzen
+  const userPrefs = preferences.filter((p) => !["interaction_count", "sessions_count", "tasks_completed_count"].includes(p.key));
+  if (userPrefs.length > 0) {
+    const prefList = userPrefs.map((p) => `- ${p.key}: ${p.value}`).join("\n");
     prompt += `\n\nBEKANNTE PRÄFERENZEN DES NUTZERS (still berücksichtigen, nie explizit erwähnen):\n${prefList}`;
   }
 
@@ -180,19 +261,40 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Response.json({ error: "Nicht autorisiert." }, { status: 401 });
 
-    // Offene Tasks + Präferenzen laden
-    let openTasks: { id: string; title: string; topic: string | null }[] = [];
-    let preferences: { key: string; value: string | null }[] = [];
-    if (user) {
-      const [tasksRes, prefsRes] = await Promise.all([
-        supabase.from("tasks").select("id, title, topic").eq("user_id", user.id).eq("status", "open"),
-        supabase.from("user_preferences").select("key, value").eq("user_id", user.id),
-      ]);
-      openTasks = tasksRes.data ?? [];
-      preferences = prefsRes.data ?? [];
-    }
+    const today = new Date().toISOString().split("T")[0];
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const systemPrompt = getSystemPrompt(openTasks, preferences);
+    // Alle Daten parallel laden
+    const [tasksRes, prefsRes, recentDoneRes, allDoneRes, overdueRes] = await Promise.all([
+      supabase.from("tasks").select("id, title, topic").eq("user_id", user.id).eq("status", "open"),
+      supabase.from("user_preferences").select("key, value").eq("user_id", user.id),
+      supabase.from("tasks").select("title, topic, updated_at").eq("user_id", user.id).eq("status", "done").gte("updated_at", sevenDaysAgo).order("updated_at", { ascending: false }).limit(5),
+      supabase.from("tasks").select("topic, updated_at, created_at").eq("user_id", user.id).eq("status", "done"),
+      supabase.from("tasks").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "open").is("reminded_at", null).lt("due_date", today),
+    ]);
+
+    const openTasks = tasksRes.data ?? [];
+    const preferences = prefsRes.data ?? [];
+    const recentDone = recentDoneRes.data ?? [];
+    const allDone = allDoneRes.data ?? [];
+    const overdueCount = overdueRes.count ?? 0;
+
+    // Statistiken aus Präferenzen lesen + inkrementieren
+    const getStatPref = (key: string) => parseInt(preferences.find((p) => p.key === key)?.value ?? "0", 10);
+    const stats: Stats = {
+      interactions: getStatPref("interaction_count") + 1,
+      sessions: getStatPref("sessions_count"),
+      tasksCompleted: allDone.length,
+    };
+
+    // interaction_count inkrementieren (fire & forget)
+    supabase.from("user_preferences").upsert(
+      { user_id: user.id, key: "interaction_count", value: String(stats.interactions), confidence: 1, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,key" }
+    );
+
+    const patterns = buildPatterns(openTasks, recentDone, allDone, overdueCount);
+    const systemPrompt = getSystemPrompt(openTasks, preferences, patterns, stats);
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
