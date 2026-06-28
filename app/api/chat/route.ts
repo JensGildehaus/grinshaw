@@ -1,6 +1,24 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import {
+  getLatestRun,
+  getRecentRuns,
+  getRunByDate,
+  getRunsSince,
+  getCpAtDate,
+  getCurrentCp,
+  type CpRecord,
+  type RunData,
+} from "@/lib/sanity";
+import {
+  analyzeRun,
+  buildWeeklySummaries,
+  parseTimeToSeconds,
+  formatPace,
+  calculatePaceSeconds,
+  STRYD_ZONES,
+} from "@/lib/runAnalysis";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -99,11 +117,52 @@ function buildPatterns(
   };
 }
 
+// =========================================================================
+// Coach-Block (Phase 4) -- aktiviert wenn Gespraech Lauf-Themen beruehrt
+// =========================================================================
+
+const COACH_PROMPT_BLOCK = `
+
+—
+
+ROLLE UND HAUS:
+Man dient einem sporttreibenden Grafen. Dessen Ertüchtigung gilt der Disziplin des Laufens, gefördert durch moderne Messgeräte der Marken Garmin und Stryd. Der Graf führt darüber ein öffentliches Tagewerk-Journal — Grinshaw kennt diese Aufzeichnungen vollständig. Bei jeder Frage zu Trainings, Wettkämpfen oder körperlicher Verfassung konsultiert Grinshaw die Sanity-Aufzeichnungen und sein Fachwissen.
+
+KOMPETENZ:
+Grinshaw kennt sich mit Trainingsmethodik exzellent aus — Power-basierte Steuerung (Stryd, Critical Power), Pulszonen, polarisiertes Trainingsmodell (Seiler), aerobe Effizienz, Erholungsindikatoren. Sein Vokabular bleibt jedoch der Epoche treu: Schrittmaß (Pace), Pulsschlag (Herzfrequenz), Ertüchtigung (Training), Tagewerk (Lauf), Beanspruchung (Belastung), Constitution (Verfassung), Reserven (Fitness-Spielraum).
+
+WERKZEUGE FÜR LAUF-THEMEN — verbindlich:
+- Fragt der Graf nach seinem heutigen oder letzten Lauf → analyze_latest_run
+- Fragt er nach einem bestimmten Tag → analyze_run_by_date(date)
+- Fragt er nach Trends oder „den letzten Wochen" → get_weekly_summary + ggf. get_recent_runs
+- Erklärt er ein Konzept (Cardiac Drift, Stryd-Zonen) → get_coach_knowledge(topic)
+- Unsicher welcher Topic-Key → list_coach_topics
+
+LÄNGENREGEL — Ausnahme:
+Bei einer Lauf-Analyse darf Grinshaw fünf bis acht Sätze verwenden. Eine substantielle Analyse braucht Substanz — die übliche Knappheit wäre hier Pflichtvernachlässigung. Jenseits von Lauf-Analysen gilt die normale Regel von zwei bis drei Sätzen weiter.
+
+INHALTLICHE GLIEDERUNG einer Lauf-Analyse (Stil bleibt frei, Reihenfolge folgt der Substanz):
+1. Was geschah — Distanz, Zeit, Schrittmaß, mittlere Leistung.
+2. Bewertung der Beanspruchung — Power-Auslastung in Prozent der Critical Power, Stryd-Zone, ggf. Pulsschlag-Verhältnis.
+3. Disziplin — passte die Ausführung zum angekündigten Lauf-Typ?
+4. Vergleich — Entwicklung gegenüber vergleichbaren Tagewerken der jüngeren Vergangenheit.
+5. Empfehlung — was sich für die folgende Einheit anbietet.
+
+WAS NICHT GETAN WIRD:
+- Keine Garmin-haften Banalitäten („Du hast 10 km zurückgelegt — gut gemacht!").
+- Kein Lob ohne Substanz. Anerkennung wird mit Substanz verdient, nie gespendet.
+- Kein Enthusiasmus. Beanspruchung wird konstatiert, nicht bejubelt.
+- Keine Empfehlung ohne Begründung aus den Daten.
+
+CHARAKTER-DEMOSTRATION (nicht wörtlich übernehmen, nur Register zeigen):
+„Man konstatiert: die Power-Auslastung lag bei 76 Prozent der Critical Power — solide im Bereich Leicht, wie ein ruhiges Tagewerk es vorsieht. Der Pulsschlag von 152 als Mittel passt zu dieser Beanspruchung — ein erfreuliches Zeichen von Constitution. Im Vergleich zur Vorwoche zeigt sich, dass das Verhältnis von Pulsschlag zu Leistung sich um drei Schläge verbessert hat — die aerobe Konstitution festigt sich, was man mit der gebotenen Zurückhaltung zur Kenntnis nimmt. Für die folgende Einheit rät man zu einer ähnlichen Disziplin, gegebenenfalls einer kürzeren Distanz."`;
+
 function getSystemPrompt(
   openTasks: { id: string; title: string; topic: string | null }[],
   preferences: { key: string; value: string | null }[],
   patterns: TaskPattern,
-  stats: Stats
+  stats: Stats,
+  currentCp: CpRecord | null,
 ) {
   const now = new Date();
   const today = now.toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -147,8 +206,104 @@ ${patternLines.join("\n")}`;
     prompt += `\n\nOFFENE ANGELEGENHEITEN (für complete_task verwenden):\n${taskList}`;
   }
 
+  // Coach-Block immer aktiv. Grinshaw entscheidet selbst, wann die
+  // Werkzeuge zum Einsatz kommen -- bei Nicht-Lauf-Themen bleibt die
+  // normale Knappheit.
+  prompt += COACH_PROMPT_BLOCK;
+
+  if (currentCp) {
+    const wkg =
+      currentCp.weight && currentCp.weight > 0
+        ? ` (${(currentCp.cpValue / currentCp.weight).toFixed(2)} W/kg)`
+        : "";
+    prompt += `\n\nAKTUELLE CRITICAL POWER DES GRAFEN: ${currentCp.cpValue} W${wkg}, gültig seit ${currentCp.validFrom}.\n\nDARAUS ABGELEITETE STRYD-ZONEN (Watt-Bereiche):`;
+    for (const z of STRYD_ZONES) {
+      const minW = Math.round((z.cpPercentMin / 100) * currentCp.cpValue);
+      const maxW =
+        z.cpPercentMax >= 999
+          ? "∞"
+          : `${Math.round((z.cpPercentMax / 100) * currentCp.cpValue)}`;
+      prompt += `\n- Z${z.zone} ${z.name}: ${z.cpPercentMin}–${z.cpPercentMax >= 999 ? "115+" : z.cpPercentMax}% CP = ${minW}–${maxW} W`;
+    }
+    prompt += `\n\nDiese Werte ändern sich, sobald ein neuer CP-Eintrag in Sanity gepflegt wird. Bei der Analyse historischer Tagewerke greift Grinshaw über getCpAtDate auf den zur damaligen Zeit gültigen CP zurück, nicht auf den aktuellen.`;
+  }
+
   return prompt;
 }
+
+// =========================================================================
+// Coach-Tools (Phase 4) -- Lauf-Coach-Erweiterung
+// =========================================================================
+
+const coachTools: Anthropic.Tool[] = [
+  {
+    name: "analyze_latest_run",
+    description:
+      "Analysiert den juengsten Lauf-Post (Power-Auslastung in % CP, Stryd-Zone, HR/Power-Verhaeltnis, Pacing-Disziplin, Vergleich zur Historie). Nutzen wenn der Nutzer nach seinem letzten Lauf oder heutigen Lauf fragt.",
+    input_schema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+  {
+    name: "analyze_run_by_date",
+    description:
+      "Analysiert einen bestimmten Lauf per Datum. Datum-Format YYYY-MM-DD.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        date: { type: "string", description: "ISO-Datum YYYY-MM-DD" },
+      },
+      required: ["date"],
+    },
+  },
+  {
+    name: "get_recent_runs",
+    description:
+      "Listet die juengsten N Lauf-Posts in kompakter Form fuer schnellen Ueberblick. Default 10.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        limit: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "get_weekly_summary",
+    description:
+      "Wochen-Aggregate (Volumen, Lauf-Anzahl, Zonen-Verteilung 80/20). Default 4 Wochen zurueck.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        weeks: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "get_coach_knowledge",
+    description:
+      "Holt einen Fachwissens-Eintrag aus der Coach-Knowledge-Bank. Verfuegbare Topics: stryd_zones, cardiac_drift, polarized_80_20, hr_power_decoupling, recovery_indicators, pacing_discipline. Nutzen wenn der Nutzer nach Konzept-Erklaerung fragt oder Grinshaw sein Wissen vertiefen will.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        topic: {
+          type: "string",
+          description: "Topic-Key, z.B. 'stryd_zones'",
+        },
+      },
+      required: ["topic"],
+    },
+  },
+  {
+    name: "list_coach_topics",
+    description:
+      "Listet alle verfuegbaren Fachwissens-Topics mit Titeln. Nutzen wenn unklar ist welcher Topic-Key relevant ist.",
+    input_schema: {
+      type: "object" as const,
+      properties: {},
+    },
+  },
+];
 
 const tools: Anthropic.Tool[] = [
   {
@@ -294,20 +449,38 @@ export async function POST(request: Request) {
     );
 
     const patterns = buildPatterns(openTasks, recentDone, allDone, overdueCount);
-    const systemPrompt = getSystemPrompt(openTasks, preferences, patterns, stats);
+
+    // Coach-Kontext: aktueller CP fuer den System-Prompt mitgeben.
+    // Wenn cpHistory leer ist, fehlt der CP-Block einfach im Prompt.
+    const currentCp = await getCurrentCp().catch(() => null);
+
+    const systemPrompt = getSystemPrompt(
+      openTasks,
+      preferences,
+      patterns,
+      stats,
+      currentCp,
+    );
+
+    const allTools = [...tools, ...coachTools];
 
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 1024,
+      max_tokens: 2048,
       system: systemPrompt,
-      tools,
+      tools: allTools,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     });
 
-    // Tool Use verarbeiten
+    // Tool Use verarbeiten -- jeder Tool-Block bekommt einen tool_result-
+    // Eintrag, gespeichert per tool_use_id. Coach-Tools liefern echte
+    // Daten als JSON-String, Side-Effect-Tools liefern "Erledigt.".
     if (user && response.stop_reason === "tool_use") {
+      const toolResultMap = new Map<string, string>();
+
       for (const block of response.content) {
         if (block.type !== "tool_use") continue;
+        let resultContent = "Erledigt.";
 
         if (block.name === "save_task") {
           const input = block.input as {
@@ -353,21 +526,150 @@ export async function POST(request: Request) {
             updated_at: new Date().toISOString(),
           }, { onConflict: "user_id,key" });
         }
+
+        // -----------------------------------------------------------------
+        // Coach-Tools
+        // -----------------------------------------------------------------
+
+        if (block.name === "analyze_latest_run") {
+          const latestRun = await getLatestRun().catch(() => null);
+          if (!latestRun) {
+            resultContent = JSON.stringify({
+              error: "Keine Lauf-Posts in Sanity gefunden.",
+            });
+          } else {
+            const [cp, recent] = await Promise.all([
+              getCpAtDate(latestRun.date).catch(() => null),
+              getRecentRuns(20).catch(() => [] as RunData[]),
+            ]);
+            const report = analyzeRun(latestRun, cp, recent);
+            resultContent = JSON.stringify(report);
+          }
+        }
+
+        if (block.name === "analyze_run_by_date") {
+          const input = block.input as { date: string };
+          const run = await getRunByDate(input.date).catch(() => null);
+          if (!run) {
+            resultContent = JSON.stringify({
+              error: `Kein Lauf am ${input.date} gefunden.`,
+            });
+          } else {
+            const [cp, recent] = await Promise.all([
+              getCpAtDate(run.date).catch(() => null),
+              getRecentRuns(20).catch(() => [] as RunData[]),
+            ]);
+            const report = analyzeRun(run, cp, recent);
+            resultContent = JSON.stringify(report);
+          }
+        }
+
+        if (block.name === "get_recent_runs") {
+          const input = block.input as { limit?: number };
+          const limit = Math.min(Math.max(input.limit ?? 10, 1), 30);
+          const runs = await getRecentRuns(limit).catch(() => [] as RunData[]);
+          // Kompakte Form fuer Ueberblick -- pace inline berechnen
+          const compact = runs.map((r) => {
+            const sec = parseTimeToSeconds(r.timeDisplay);
+            const paceLabel =
+              sec != null && r.distance != null && r.distance > 0
+                ? formatPace(calculatePaceSeconds(r.distance, sec))
+                : null;
+            return {
+              date: r.date,
+              title: r.title,
+              runType: r.runType,
+              distanceKm: r.distance,
+              time: r.timeDisplay,
+              pace: paceLabel,
+              avgPower: r.avgPower,
+              maxPower: r.maxPower,
+              avgHR: r.avgHR,
+              maxHR: r.maxHR,
+              isWettkampf: r.runType === "wettkampf",
+              event: r.eventName,
+            };
+          });
+          resultContent = JSON.stringify({ count: compact.length, runs: compact });
+        }
+
+        if (block.name === "get_weekly_summary") {
+          const input = block.input as { weeks?: number };
+          const weeks = Math.min(Math.max(input.weeks ?? 4, 1), 12);
+          const sinceDate = new Date(Date.now() - weeks * 7 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10);
+          const runs = await getRunsSince(sinceDate).catch(
+            () => [] as RunData[],
+          );
+
+          // CP-Lookup-Cache fuer Zonen-Verteilung (ein CP pro Lauf-Datum)
+          const cpCache = new Map<string, number | null>();
+          const cpProvider = (date: string): number | null => {
+            const cached = cpCache.get(date);
+            if (cached !== undefined) return cached;
+            return null; // Async waere hier zu komplex; CP-fetch passiert vorab
+          };
+
+          // CP fuer alle relevanten Daten vorab laden
+          const uniqueDates = Array.from(new Set(runs.map((r) => r.date)));
+          await Promise.all(
+            uniqueDates.map(async (d) => {
+              const rec = await getCpAtDate(d).catch(() => null);
+              cpCache.set(d, rec?.cpValue ?? null);
+            }),
+          );
+
+          const summaries = buildWeeklySummaries(runs, cpProvider);
+          resultContent = JSON.stringify({ weeksRequested: weeks, summaries });
+        }
+
+        if (block.name === "get_coach_knowledge") {
+          const input = block.input as { topic: string };
+          const { data } = await supabase
+            .from("coach_knowledge")
+            .select("topic, title, content_md, tags")
+            .eq("topic", input.topic)
+            .maybeSingle();
+          if (!data) {
+            resultContent = JSON.stringify({
+              error: `Topic '${input.topic}' nicht gefunden. Mit list_coach_topics verfuegbare Topics abrufen.`,
+            });
+          } else {
+            resultContent = JSON.stringify(data);
+          }
+        }
+
+        if (block.name === "list_coach_topics") {
+          const { data } = await supabase
+            .from("coach_knowledge")
+            .select("topic, title")
+            .order("title");
+          resultContent = JSON.stringify({
+            count: data?.length ?? 0,
+            topics: data ?? [],
+          });
+        }
+
+        toolResultMap.set(block.id, resultContent);
       }
 
       const toolResults = response.content
         .filter((b) => b.type === "tool_use")
-        .map((b) => ({
-          type: "tool_result" as const,
-          tool_use_id: (b as Anthropic.ToolUseBlock).id,
-          content: "Erledigt.",
-        }));
+        .map((b) => {
+          const tu = b as Anthropic.ToolUseBlock;
+          return {
+            type: "tool_result" as const,
+            tool_use_id: tu.id,
+            content: toolResultMap.get(tu.id) ?? "Erledigt.",
+          };
+        });
 
       const followUp = await client.messages.create({
         model: "claude-sonnet-4-6",
-        max_tokens: 1024,
+        max_tokens: 2048,
         system: systemPrompt,
-        tools,
+        tools: allTools,
         messages: [
           ...messages.map((m) => ({ role: m.role, content: m.content })),
           { role: "assistant" as const, content: response.content },
