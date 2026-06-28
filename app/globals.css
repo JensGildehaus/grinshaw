@@ -59,6 +59,9 @@ body {
 
 .butler-img {
   height: 270px;
+  /* Bei niedrigem Viewport (z.B. Desktop-Browser-Fenster nicht maximiert)
+     schrumpft der Avatar mit, damit das Eingabefeld unten sichtbar bleibt. */
+  max-height: 38vh;
 }
 
 @media (min-width: 640px) {
@@ -73,5 +76,6 @@ body {
 
   .butler-img {
     height: 300px;
+    max-height: 42vh;
   }
 }
