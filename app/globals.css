@@ -13,6 +13,10 @@ html,
 body {
   height: 100%;
   height: 100dvh;
+  /* Deaktiviert Pull-to-Refresh auf Mobile (Chrome/Safari).
+     Sonst zieht der User am Anfang nach unten und die Seite refresht --
+     der Chat startet by-design frisch, also waere die letzte Antwort weg. */
+  overscroll-behavior-y: none;
 }
 
 body {
