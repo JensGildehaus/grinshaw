@@ -31,7 +31,19 @@ alter table coach_knowledge disable row level security;
 --   create policy "coach_knowledge: alle lesen" on coach_knowledge
 --     for select using (true);
 
--- updated_at automatisch setzen (Funktion existiert seit schema.sql)
+-- updated_at-Trigger-Funktion. CREATE OR REPLACE -- idempotent, falls
+-- sie aus einer frueheren Migration noch nicht in der Live-DB landete,
+-- wird sie hier definiert. Falls schon vorhanden: kein Schaden.
+create or replace function set_updated_at()
+returns trigger as $func$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$func$ language plpgsql;
+
+-- Trigger idempotent neu anlegen
+drop trigger if exists coach_knowledge_updated_at on coach_knowledge;
 create trigger coach_knowledge_updated_at
   before update on coach_knowledge
   for each row execute function set_updated_at();
