@@ -215,11 +215,13 @@ export default function Home() {
     <InstallPrompt />
     <div
       style={{
-        height: "100%",
+        // min-height statt height: bei langen Coach-Antworten kann
+        // der Outer wachsen + Body scrollt. Pull-to-Refresh bleibt
+        // durch overscroll-behavior-y: none auf html/body deaktiviert.
+        minHeight: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        overflow: "hidden",
       }}
     >
       {/* Header */}
