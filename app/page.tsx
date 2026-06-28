@@ -16,7 +16,6 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const [weather, setWeather] = useState<string | null>(null);
   const [greeting, setGreeting] = useState<string>("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -55,6 +54,11 @@ export default function Home() {
   }
 
 
+  // Wettervorhersage entfernt 2026-06-26 (Jens-Wunsch). Geolocation +
+  // Open-Meteo-API + die zahlreichen Grinshaw-Kommentar-Listen wandern
+  // damit aus dem Startscreen raus. Wenn das je zurueck soll: Git-
+  // History vor diesem Datum.
+  /*
   useEffect(() => {
     function fetchWeather(lat: number, lon: number) {
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&timezone=auto`)
@@ -135,6 +139,7 @@ export default function Home() {
       fetchWeather(51.2977, 6.8497);
     }
   }, []);
+  */
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -334,18 +339,6 @@ export default function Home() {
               >
                 {greeting}
               </p>
-              {weather && (
-                <p style={{
-                  fontSize: "0.82rem",
-                  color: "var(--g-text)",
-                  fontStyle: "italic",
-                  maxWidth: "320px",
-                  lineHeight: "1.7",
-                  margin: "0 auto",
-                }}>
-                  {weather}
-                </p>
-              )}
             </div>
           )}
         </div>
